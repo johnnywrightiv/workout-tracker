@@ -70,7 +70,7 @@ export default function Home() {
 
 	if (!isAuthenticated) {
 		return (
-			<div className="container px-6 mx-auto py-6 space-y-8">
+			<div className="container px-8 mx-auto py-6 space-y-8">
 				<h2 className="text-lg">
 					Please log in to view your workouts
 				</h2>
@@ -82,7 +82,7 @@ export default function Home() {
 	}
 
 	return (
-		<div className="container mx-auto py-6 px-6 space-y-8">
+		<div className="container mx-auto py-6 px-8 space-y-8">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Past Workouts</h2>
         <div className="flex space-x-4">
@@ -106,7 +106,7 @@ export default function Home() {
 				</div>
 			</div>
 
-			<div className="p-4 space-y-4">
+			<div className="space-y-4">
 				{workouts.map((workout) => (
 					<Card key={workout._id}>
 						<CardHeader>

@@ -5,6 +5,8 @@ import localFont from "next/font/local";
 
 import { ReduxProvider } from "@/store/provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import  AuthProvider from '@/components/auth-provider';
+
 import Navbar from "@/components/navbar";
 
 const geistSans = localFont({
@@ -32,20 +34,22 @@ export default function RootLayout({
     <html suppressHydrationWarning lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navbar />
-            <div className="mt-16">
-              <div className="hidden lg:block">{/* <Sidebar /> */}</div>
-              <main className="">{children}</main>
-            </div>
-            <footer>{/* <FooterContent /> */}</footer>
-            {/* <BottomBar /> */}
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Navbar />
+              <div className="mt-16">
+                <div className="hidden lg:block">{/* <Sidebar /> */}</div>
+                <main className="">{children}</main>
+              </div>
+              <footer>{/* <FooterContent /> */}</footer>
+              {/* <BottomBar /> */}
+            </ThemeProvider>
+          </AuthProvider>
         </ReduxProvider>
       </body>
     </html>
