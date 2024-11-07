@@ -38,9 +38,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {/* <Navbar /> */}
-            <div className="flex-grow flex">
+            <div className="">
               <div className="hidden lg:block">{/* <Sidebar /> */}</div>
-              <main className="flex-grow flex justify-center ">{children}</main>
+              <main className="">{children}</main>
             </div>
             <footer>{/* <FooterContent /> */}</footer>
             {/* <BottomBar /> */}

@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import globalSearchReducer from './global-search-slice';
+import globalSearchReducer from '@/store/global-search-slice';
 
 export const store = configureStore({
   reducer: {
