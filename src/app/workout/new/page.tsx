@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,62 +16,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-interface Exercise {
-	name: string;
-	sets: number;
-	reps: number;
-	weight: number;
-	notes: string;
-}
-
-interface Workout {
-	_id: string;
-	duration: number;
-	notes: string;
-	exercises: Exercise[];
-}
-
-const EditWorkout = () => {
-	const [workout, setWorkout] = useState<Workout | null>(null);
+export default function CreateWorkout() {
 	const [duration, setDuration] = useState(0);
 	const [notes, setNotes] = useState('');
-	const [exercises, setExercises] = useState<Exercise[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState('');
-
+	const [exercises, setExercises] = useState([
+		{ name: '', sets: '', reps: '', weight: '', notes: '' },
+	]);
+	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
-	const params = useParams();
-	const id = params.id;
 	const { toast } = useToast();
-
-	useEffect(() => {
-		async function fetchWorkout() {
-			if (!id) return;
-
-			try {
-				setLoading(true);
-				const response = await axios.get(`/api/workouts/${id}`, {
-					withCredentials: true,
-				});
-				const workoutData = response.data;
-				setWorkout(workoutData);
-				setDuration(workoutData.duration);
-				setNotes(workoutData.notes);
-				setExercises(workoutData.exercises || []);
-			} catch (err) {
-				console.error('Failed to fetch workout:', err);
-				setError('Failed to load workout');
-			} finally {
-				setLoading(false);
-			}
-		}
-
-		fetchWorkout();
-	}, [id]);
 
 	const handleExerciseChange = (
 		index: number,
-		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+		e: React.ChangeEvent<HTMLInputElement>
 	) => {
 		const updatedExercises = [...exercises];
 		updatedExercises[index][e.target.name] = e.target.value;
@@ -81,7 +38,7 @@ const EditWorkout = () => {
 	const handleAddExercise = () => {
 		setExercises([
 			...exercises,
-			{ name: '', sets: 0, reps: 0, weight: 0, notes: '' },
+			{ name: '', sets: '', reps: '', weight: '', notes: '' },
 		]);
 	};
 
@@ -92,44 +49,48 @@ const EditWorkout = () => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setIsLoading(true);
 
 		try {
-			const updatedWorkout = {
-				duration,
-				notes,
-				exercises, // Include exercises in the update request
-			};
-
-			await axios.put(`/api/workouts/${id}`, updatedWorkout, {
-				withCredentials: true,
-			});
-
+			await axios.post(
+				'/api/workouts',
+				{
+					duration,
+					notes,
+					exercises, // Include exercises in the POST data
+				},
+				{
+					withCredentials: true,
+				}
+			);
 			toast({
-				title: 'Workout updated',
-				description: 'Your workout has been successfully updated.',
+				title: 'Workout created',
+				description: 'Your new workout has been successfully added.',
 			});
-			router.push('/');
-			router.refresh(); // Force a refresh of the server components
-		} catch (err) {
-			console.error('Failed to update workout:', err);
-			setError('Failed to update workout');
+			router.push('/'); // Navigate back to workouts list
+		} catch (error) {
+			console.error('Failed to create workout:', error);
+			toast({
+				title: 'Error',
+				description: 'Failed to create workout. Please try again.',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	if (loading) return <div>Loading...</div>;
-	if (error) return <div>Error: {error}</div>;
-	if (!workout) return <div>Workout not found</div>;
-
 	return (
 		<div className="container mx-auto py-6">
-			{/* Update max-w-md to a larger value like max-w-xl */}
+			{/* Update max-w-md to a larger value like max-w-xl or w-full */}
 			<Card className="max-w-xl mx-auto">
 				<CardHeader>
-					<CardTitle className="text-2xl font-bold">Edit Workout</CardTitle>
+					<CardTitle className="text-2xl font-bold">
+						Create New Workout
+					</CardTitle>
 				</CardHeader>
 				<form onSubmit={handleSubmit}>
 					<CardContent className="space-y-4">
-						{/* Duration Input */}
 						<div className="space-y-2">
 							<label
 								htmlFor="duration"
@@ -147,7 +108,6 @@ const EditWorkout = () => {
 							/>
 						</div>
 
-						{/* Notes Input */}
 						<div className="space-y-2">
 							<label
 								htmlFor="notes"
@@ -271,14 +231,14 @@ const EditWorkout = () => {
 						</div>
 					</CardContent>
 					<CardFooter>
-						<Button type="submit" className="w-full" disabled={loading}>
-							{loading ? (
+						<Button type="submit" className="w-full" disabled={isLoading}>
+							{isLoading ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Updating...
+									Creating...
 								</>
 							) : (
-								'Save Changes'
+								'Create Workout'
 							)}
 						</Button>
 					</CardFooter>
@@ -286,6 +246,4 @@ const EditWorkout = () => {
 			</Card>
 		</div>
 	);
-};
-
-export default EditWorkout;
+}

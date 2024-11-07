@@ -2,6 +2,19 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const Signup = () => {
 	const [email, setEmail] = useState('');
@@ -12,6 +25,7 @@ const Signup = () => {
 
 	const handleSignup = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setError('');
 
 		try {
 			const response = await fetch('/api/auth/signup', {
@@ -25,58 +39,73 @@ const Signup = () => {
 			const data = await response.json();
 
 			if (response.ok) {
-				// Redirect to the home page after successful signup
 				router.push('/');
 			} else {
-				setError(data.message);
+				setError(data.message || 'Signup failed');
 			}
 		} catch (error) {
-			setError('Something went wrong. Please try again.');
+			console.error('Signup error:', error);
+			setError('An unexpected error occurred');
 		}
 	};
 
 	return (
-		<div className="flex flex-col items-center">
-			<h2 className="text-2xl">Sign Up</h2>
-			<form onSubmit={handleSignup} className="space-y-4">
-				<div>
-					<label htmlFor="name">Name</label>
-					<input
-						type="text"
-						id="name"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						required
-						className="border p-2"
-					/>
-				</div>
-				<div>
-					<label htmlFor="email">Email</label>
-					<input
-						type="email"
-						id="email"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-						className="border p-2"
-					/>
-				</div>
-				<div>
-					<label htmlFor="password">Password</label>
-					<input
-						type="password"
-						id="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-						className="border p-2"
-					/>
-				</div>
-				{error && <p className="text-red-500">{error}</p>}
-				<button type="submit" className="mt-4 px-4 py-2 bg-blue-500 text-white">
-					Sign Up
-				</button>
-			</form>
+		<div className="flex items-center justify-center min-h-screen bg-background">
+			<Card className="w-[350px]">
+				<CardHeader>
+					<CardTitle>Sign Up</CardTitle>
+					<CardDescription>Create your account to get started</CardDescription>
+				</CardHeader>
+				<form onSubmit={handleSignup}>
+					<CardContent className="space-y-4">
+						{error && (
+							<Alert variant="destructive">
+								<AlertCircle className="h-4 w-4" />
+								<AlertTitle>Error</AlertTitle>
+								<AlertDescription>{error}</AlertDescription>
+							</Alert>
+						)}
+						<div className="space-y-2">
+							<Label htmlFor="name">Name</Label>
+							<Input
+								id="name"
+								placeholder="First Last"
+								type="text"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								required
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="email">Email</Label>
+							<Input
+								id="email"
+								type="email"
+								placeholder="Email"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								required
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="password">Password</Label>
+							<Input
+								id="password"
+								type="password"
+								placeholder='Password'
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								required
+							/>
+						</div>
+					</CardContent>
+					<CardFooter>
+						<Button type="submit" className="w-full">
+							Sign Up
+						</Button>
+					</CardFooter>
+				</form>
+			</Card>
 		</div>
 	);
 };

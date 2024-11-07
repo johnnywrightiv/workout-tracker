@@ -1,10 +1,12 @@
-import { configureStore } from "@reduxjs/toolkit";
-import globalSearchReducer from '@/store/global-search-slice';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '@/store/auth-slice';
+import workoutsReducer from '@/store/workouts-slice';
 
 export const store = configureStore({
-  reducer: {
-    globalSearch: globalSearchReducer,
-  },
+	reducer: {
+		auth: authReducer,
+		workouts: workoutsReducer,
+	},
 });
 
 export type RootState = ReturnType<typeof store.getState>;

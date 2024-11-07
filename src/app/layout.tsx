@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 
 import { ReduxProvider } from "@/store/provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import Navbar from "@/components/navbar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,8 +38,8 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {/* <Navbar /> */}
-            <div className="">
+            <Navbar />
+            <div className="mt-16">
               <div className="hidden lg:block">{/* <Sidebar /> */}</div>
               <main className="">{children}</main>
             </div>
