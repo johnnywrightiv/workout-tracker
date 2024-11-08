@@ -12,13 +12,7 @@ import {
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -30,6 +24,23 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+	Circle,
+	Calendar,
+	Clock,
+	Trash2,
+	Edit2,
+	Filter,
+	SortAsc,
+	MoreVertical,
+} from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Home() {
 	const dispatch = useDispatch<AppDispatch>();
@@ -58,23 +69,23 @@ export default function Home() {
 	};
 
 	const handleFilter = () => {
-    // Logic for filtering workouts (e.g., show a modal or dropdown)
-    console.log('Filter button clicked');
-  };
+		console.log('Filter button clicked');
+	};
 
-  const handleSort = () => {
-    // Logic for sorting workouts (e.g., toggle sorting order or open a dropdown)
-    console.log('Sort button clicked');
-  };
-
+	const handleSort = () => {
+		console.log('Sort button clicked');
+	};
 
 	if (!isAuthenticated) {
 		return (
-			<div className="container px-8 mx-auto py-6 space-y-8">
-				<h2 className="text-lg">
-					Please log in to view your workouts
+			<div className="container mx-auto py-16 px-4 text-center">
+				<h2 className="text-3xl font-bold mb-8">
+					Welcome to Your Workout Tracker
 				</h2>
-				<Button asChild>
+				<p className="text-xl mb-8">
+					Please log in to view and manage your workouts.
+				</p>
+				<Button asChild size="lg">
 					<Link href="/login">Log In</Link>
 				</Button>
 			</div>
@@ -82,85 +93,127 @@ export default function Home() {
 	}
 
 	return (
-		<div className="container mx-auto py-6 px-8 space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Past Workouts</h2>
-        <div className="flex space-x-4">
-          {/* Filter Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleFilter}
-          >
-            Filter
-          </Button>
-
-          {/* Sort Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSort}
-          >
-            Sort
-          </Button>
+		<div className="container mx-auto py-8 px-4 space-y-8">
+			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+				<h1 className="text-3xl sm:text-4xl font-bold">Past Workouts</h1>
+				<div className="flex space-x-4">
+					<Button variant="outline" size="sm" onClick={handleFilter}>
+						<Filter className="mr-2 h-4 w-4" />
+						Filter
+					</Button>
+					<Button variant="outline" size="sm" onClick={handleSort}>
+						<SortAsc className="mr-2 h-4 w-4" />
+						Sort
+					</Button>
 				</div>
 			</div>
 
-			<div className="space-y-4">
-				{workouts.map((workout) => (
-					<Card key={workout._id}>
-						<CardHeader>
-							<h1 className='text-3xl'>Name: {workout.name}</h1>
-							<CardTitle>{new Date(workout.date).toLocaleString()}</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="text-muted-foreground">{workout.notes}</p>
-							<p>Duration: {workout.duration} minutes</p>
-							{workout.exercises && (
-								<div className="mt-4">
-									<h3 className="font-semibold mb-2">Exercises:</h3>
-									<ul className="space-y-1">
-										{workout.exercises.map((exercise, index) => (
-											<li key={index}>
-												{exercise.name}: {exercise.sets} sets × {exercise.reps}{' '}
-												reps @ {exercise.weight}lbs
-											</li>
-										))}
-									</ul>
+			<ScrollArea className="h-[calc(100vh-12rem)]">
+				<div className="space-y-6">
+					{workouts.map((workout) => (
+						<Card key={workout._id} className="w-full">
+							<CardHeader className="flex flex-col">
+								<div className="flex justify-between items-start w-full">
+									<CardTitle className="text-2xl font-bold">
+										{workout.name}
+									</CardTitle>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="ghost" className="h-8 w-8 p-0">
+												<span className="sr-only">Open menu</span>
+												<MoreVertical className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem asChild>
+												<Link href={`/workout/${workout._id}`}>
+													<Edit2 className="mr-2 h-4 w-4" />
+													<span>Edit</span>
+												</Link>
+											</DropdownMenuItem>
+											<AlertDialog>
+												<AlertDialogTrigger asChild>
+													<DropdownMenuItem
+														onSelect={(e) => e.preventDefault()}
+													>
+														<Trash2 className="mr-2 h-4 w-4" />
+														<span>Delete</span>
+													</DropdownMenuItem>
+												</AlertDialogTrigger>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>Are you sure?</AlertDialogTitle>
+														<AlertDialogDescription>
+															This action cannot be undone. This will
+															permanently delete your workout.
+														</AlertDialogDescription>
+													</AlertDialogHeader>
+													<AlertDialogFooter>
+														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogAction
+															onClick={() => handleDelete(workout._id)}
+															className="bg-destructive hover:bg-destructive/80"
+														>
+															Delete
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
-							)}
-						</CardContent>
-						<CardFooter className="flex justify-end space-x-2">
-							<Button variant="outline" asChild>
-								<Link href={`/workout/${workout._id}`}>Edit</Link>
-							</Button>
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<Button variant="destructive">Delete</Button>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle>Are you sure?</AlertDialogTitle>
-										<AlertDialogDescription>
-											This action cannot be undone. This will permanently delete
-											your workout.
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogFooter>
-										<AlertDialogCancel>Cancel</AlertDialogCancel>
-										<AlertDialogAction
-											onClick={() => handleDelete(workout._id)}
-											className="bg-destructive hover:bg-destructive/80"
-										>
-											Delete
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialog>
-						</CardFooter>
-					</Card>
-				))}
-			</div>
+								<div className="flex flex-col  space-y-1 text-muted-foreground">
+									<div className="flex items-center">
+										<Calendar className="mr-2 h-4 w-4" />
+										<span>{new Date(workout.date).toLocaleDateString()}</span>
+										<span className="ml-1">
+											{new Date(workout.date).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+											})}
+										</span>
+									</div>
+									<div className="flex items-center text-muted-foreground">
+										<Clock className="mr-2 h-4 w-4" />
+										<span>{workout.duration} minutes</span>
+									</div>
+								</div>
+							</CardHeader>
+							<CardContent>
+								<p className="text-muted-foreground mb-4">{workout.notes}</p>
+								{workout.exercises && (
+									<div className="space-y-4">
+										{Object.entries(
+											workout.exercises.reduce((acc, exercise) => {
+												if (!acc[exercise.muscleGroup]) {
+													acc[exercise.muscleGroup] = [];
+												}
+												acc[exercise.muscleGroup].push(exercise);
+												return acc;
+											}, {} as Record<string, typeof workout.exercises>)
+										).map(([muscleGroup, exercises]) => (
+											<div key={muscleGroup}>
+												<h4 className="font-semibold mb-2">{muscleGroup}</h4>
+												<ul className="space-y-1">
+													{exercises.map((exercise, index) => (
+														<li key={index} className="flex items-center">
+															<Circle className="mr-2 h-1 w-1 bg-foreground rounded-full flex-shrink-0" />
+															<span className="text-sm">
+																{exercise.name}: {exercise.sets} ×{' '}
+																{exercise.reps} @ {exercise.weight}lbs
+															</span>
+														</li>
+													))}
+												</ul>
+											</div>
+										))}
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			</ScrollArea>
 		</div>
 	);
 }

@@ -372,7 +372,7 @@ export default function WorkoutForm({
 									{id ? 'Updating...' : 'Creating...'}
 								</>
 							) : (
-								`${id ? 'Save Changes' : 'Create'} ${
+								`${id ? 'Save' : 'Create'} ${
 									isTemplate ? 'Template' : 'Workout'
 								}`
 							)}

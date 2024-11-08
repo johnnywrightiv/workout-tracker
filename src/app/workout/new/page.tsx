@@ -1,26 +1,3 @@
-// 'use client';
-
-// import WorkoutForm from '@/components/workout-form';
-// import axios from 'axios';
-
-// export default function CreateWorkout() {
-// 	const handleSubmit = async (data) => {
-// 		await axios.post(
-// 			'/api/workouts',
-// 			{
-// 				...data,
-// 				date: new Date(),
-// 			},
-// 			{
-// 				withCredentials: true,
-// 			}
-// 		);
-// 	};
-
-// 	return <WorkoutForm onSubmit={handleSubmit} />;
-// }
-
-
 'use client';
 
 import { useEffect, useState } from 'react';

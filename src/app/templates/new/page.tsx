@@ -37,8 +37,6 @@ export default function NewWorkout() {
     }
   };
 
-  if (!templateData) return <div>Loading...</div>; // Show loading state until data is fetched
-
   return (
     <WorkoutForm
       initialData={templateData} // Pass the fetched template data as initialData

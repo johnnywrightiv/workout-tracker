@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '@/store/auth-slice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,18 +16,31 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { RootState } from '@/store/store'; // Make sure to import RootState type
 
 const Login = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
+	const [isLoggingIn, setIsLoggingIn] = useState(false);
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const isAuthenticated = useSelector(
+		(state: RootState) => state.auth.isAuthenticated
+	);
+
+	// Watch for auth state changes and navigate accordingly
+	useEffect(() => {
+		if (isAuthenticated && isLoggingIn) {
+			router.push('/');
+		}
+	}, [isAuthenticated, isLoggingIn, router]);
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
+		setIsLoggingIn(true);
 
 		try {
 			const response = await fetch('/api/auth/login', {
@@ -41,7 +54,6 @@ const Login = () => {
 			const data = await response.json();
 
 			if (response.ok) {
-				// Dispatch login action to update Redux store
 				dispatch(
 					login({
 						userId: data.userId,
@@ -49,13 +61,15 @@ const Login = () => {
 						name: data.name,
 					})
 				);
-				router.push('/');
+				// Navigation will happen via the useEffect
 			} else {
 				setError(data.message || 'Login failed');
+				setIsLoggingIn(false);
 			}
 		} catch (error) {
 			console.error('Login error:', error);
 			setError('An unexpected error occurred');
+			setIsLoggingIn(false);
 		}
 	};
 
@@ -86,6 +100,7 @@ const Login = () => {
 								onChange={(e) => setEmail(e.target.value)}
 								placeholder="Email"
 								required
+								disabled={isLoggingIn}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -97,12 +112,20 @@ const Login = () => {
 								onChange={(e) => setPassword(e.target.value)}
 								placeholder="Password"
 								required
+								disabled={isLoggingIn}
 							/>
 						</div>
 					</CardContent>
 					<CardFooter>
-						<Button type="submit" className="w-full">
-							Login
+						<Button type="submit" className="w-full" disabled={isLoggingIn}>
+							{isLoggingIn ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Logging in...
+								</>
+							) : (
+								'Login'
+							)}
 						</Button>
 					</CardFooter>
 				</form>

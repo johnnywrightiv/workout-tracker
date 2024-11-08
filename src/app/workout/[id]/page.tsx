@@ -27,7 +27,5 @@ export default function EditWorkout() {
 		});
 	};
 
-	if (!workout) return <div>Loading...</div>;
-
 	return <WorkoutForm initialData={workout} id={id} onSubmit={handleSubmit} />;
 }

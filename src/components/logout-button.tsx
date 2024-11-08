@@ -28,7 +28,7 @@ const LogoutButton = () => {
 			if (response.ok) {
 				dispatch(logout());
 				dispatch(clearWorkouts());
-				router.push('/login');
+				router.push('/');
 			} else {
 				console.error('Logout failed');
 			}
