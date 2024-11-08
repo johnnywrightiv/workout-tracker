@@ -34,13 +34,13 @@ import {
 	SortAsc,
 	MoreVertical,
 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { setUserDetails } from '@/store/auth-slice';
 
 export default function Home() {
 	const dispatch = useDispatch<AppDispatch>();
@@ -49,14 +49,24 @@ export default function Home() {
 	const isAuthenticated = useSelector(
 		(state: RootState) => state.auth.isAuthenticated
 	);
+	const user = useSelector((state: RootState) => state.auth.user);
 
 	useEffect(() => {
+		// Check if we're authenticated but missing user data
+		if (isAuthenticated && !user) {
+			const savedUser = localStorage.getItem('auth_user');
+			if (savedUser) {
+				dispatch(setUserDetails(JSON.parse(savedUser)));
+			}
+		}
+
+		// Fetch workouts if authenticated
 		if (isAuthenticated) {
 			dispatch(fetchWorkouts());
 		} else {
 			dispatch(clearWorkouts());
 		}
-	}, [dispatch, isAuthenticated]);
+	}, [dispatch, isAuthenticated, user]);
 
 	const handleDelete = async (workoutId: string) => {
 		try {
@@ -108,112 +118,108 @@ export default function Home() {
 				</div>
 			</div>
 
-			<ScrollArea className="h-[calc(100vh-12rem)]">
-				<div className="space-y-6">
-					{workouts.map((workout) => (
-						<Card key={workout._id} className="w-full">
-							<CardHeader className="flex flex-col">
-								<div className="flex justify-between items-start w-full">
-									<CardTitle className="text-2xl font-bold">
-										{workout.name}
-									</CardTitle>
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" className="h-8 w-8 p-0">
-												<span className="sr-only">Open menu</span>
-												<MoreVertical className="h-4 w-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end">
-											<DropdownMenuItem asChild>
-												<Link href={`/workout/${workout._id}`}>
-													<Edit2 className="mr-2 h-4 w-4" />
-													<span>Edit</span>
-												</Link>
-											</DropdownMenuItem>
-											<AlertDialog>
-												<AlertDialogTrigger asChild>
-													<DropdownMenuItem
-														onSelect={(e) => e.preventDefault()}
+			<div className="space-y-6">
+				{workouts.map((workout) => (
+					<Card key={workout._id} className="w-full">
+						<CardHeader className="flex flex-col">
+							<div className="flex justify-between items-start w-full">
+								<CardTitle className="text-2xl font-bold">
+									{workout.name}
+								</CardTitle>
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="ghost" className="h-8 w-8 p-0">
+											<span className="sr-only">Open menu</span>
+											<MoreVertical className="h-4 w-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										<DropdownMenuItem asChild>
+											<Link href={`/workout/${workout._id}`}>
+												<Edit2 className="mr-2 h-4 w-4" />
+												<span>Edit</span>
+											</Link>
+										</DropdownMenuItem>
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+													<Trash2 className="mr-2 h-4 w-4" />
+													<span>Delete</span>
+												</DropdownMenuItem>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>Are you sure?</AlertDialogTitle>
+													<AlertDialogDescription>
+														This action cannot be undone. This will permanently
+														delete your workout.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() => handleDelete(workout._id)}
+														className="bg-destructive hover:bg-destructive/80"
 													>
-														<Trash2 className="mr-2 h-4 w-4" />
-														<span>Delete</span>
-													</DropdownMenuItem>
-												</AlertDialogTrigger>
-												<AlertDialogContent>
-													<AlertDialogHeader>
-														<AlertDialogTitle>Are you sure?</AlertDialogTitle>
-														<AlertDialogDescription>
-															This action cannot be undone. This will
-															permanently delete your workout.
-														</AlertDialogDescription>
-													</AlertDialogHeader>
-													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
-														<AlertDialogAction
-															onClick={() => handleDelete(workout._id)}
-															className="bg-destructive hover:bg-destructive/80"
-														>
-															Delete
-														</AlertDialogAction>
-													</AlertDialogFooter>
-												</AlertDialogContent>
-											</AlertDialog>
-										</DropdownMenuContent>
-									</DropdownMenu>
+														Delete
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							</div>
+							<div className="flex flex-col  space-y-1 text-muted-foreground">
+								<div className="flex items-center">
+									<Calendar className="mr-2 h-4 w-4" />
+									<span>{new Date(workout.date).toLocaleDateString()}</span>
+									<span className="ml-1">
+										{new Date(workout.date).toLocaleTimeString([], {
+											hour: '2-digit',
+											minute: '2-digit',
+										})}
+									</span>
 								</div>
-								<div className="flex flex-col  space-y-1 text-muted-foreground">
-									<div className="flex items-center">
-										<Calendar className="mr-2 h-4 w-4" />
-										<span>{new Date(workout.date).toLocaleDateString()}</span>
-										<span className="ml-1">
-											{new Date(workout.date).toLocaleTimeString([], {
-												hour: '2-digit',
-												minute: '2-digit',
-											})}
-										</span>
-									</div>
-									<div className="flex items-center text-muted-foreground">
-										<Clock className="mr-2 h-4 w-4" />
-										<span>{workout.duration} minutes</span>
-									</div>
+								<div className="flex items-center text-muted-foreground">
+									<Clock className="mr-2 h-4 w-4" />
+									<span>{workout.duration} minutes</span>
 								</div>
-							</CardHeader>
-							<CardContent>
-								<p className="text-muted-foreground mb-4">{workout.notes}</p>
-								{workout.exercises && (
-									<div className="space-y-4">
-										{Object.entries(
-											workout.exercises.reduce((acc, exercise) => {
-												if (!acc[exercise.muscleGroup]) {
-													acc[exercise.muscleGroup] = [];
-												}
-												acc[exercise.muscleGroup].push(exercise);
-												return acc;
-											}, {} as Record<string, typeof workout.exercises>)
-										).map(([muscleGroup, exercises]) => (
-											<div key={muscleGroup}>
-												<h4 className="font-semibold mb-2">{muscleGroup}</h4>
-												<ul className="space-y-1">
-													{exercises.map((exercise, index) => (
-														<li key={index} className="flex items-center">
-															<Circle className="mr-2 h-1 w-1 bg-foreground rounded-full flex-shrink-0" />
-															<span className="text-sm">
-																{exercise.name}: {exercise.sets} ×{' '}
-																{exercise.reps} @ {exercise.weight}lbs
-															</span>
-														</li>
-													))}
-												</ul>
-											</div>
-										))}
-									</div>
-								)}
-							</CardContent>
-						</Card>
-					))}
-				</div>
-			</ScrollArea>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<p className="text-muted-foreground mb-4">{workout.notes}</p>
+							{workout.exercises && (
+								<div className="space-y-4">
+									{Object.entries(
+										workout.exercises.reduce((acc, exercise) => {
+											if (!acc[exercise.muscleGroup]) {
+												acc[exercise.muscleGroup] = [];
+											}
+											acc[exercise.muscleGroup].push(exercise);
+											return acc;
+										}, {} as Record<string, typeof workout.exercises>)
+									).map(([muscleGroup, exercises]) => (
+										<div key={muscleGroup}>
+											<h4 className="font-semibold mb-2">{muscleGroup}</h4>
+											<ul className="space-y-1">
+												{exercises.map((exercise, index) => (
+													<li key={index} className="flex items-center">
+														<Circle className="mr-2 h-1 w-1 bg-foreground rounded-full flex-shrink-0" />
+														<span className="text-sm">
+															{exercise.name}: {exercise.sets} × {exercise.reps}{' '}
+															@ {exercise.weight}lbs
+														</span>
+													</li>
+												))}
+											</ul>
+										</div>
+									))}
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				))}
+			</div>
 		</div>
 	);
 }

@@ -26,18 +26,15 @@ export default function WorkoutButton() {
 
 	// Fetch templates when dropdown is opened
 	const handleDropdownOpen = async () => {
-		if (!templates.length) {
-			setLoading(true);
-			try {
-				const response = await axios.get('/api/templates', {
-					withCredentials: true,
-				});
-				setTemplates(response.data);
-			} catch (error) {
-				console.error('Failed to fetch templates:', error);
-			} finally {
-				setLoading(false);
-			}
+		try {
+			const response = await axios.get('/api/templates', {
+				withCredentials: true,
+			});
+			setTemplates(response.data);
+		} catch (error) {
+			console.error('Failed to fetch templates:', error);
+		} finally {
+			setLoading(false);
 		}
 	};
 

@@ -20,7 +20,6 @@ interface Template {
 
 export default function TemplatesPage() {
 	const [templates, setTemplates] = useState<Template[]>([]);
-	const [loading, setLoading] = useState(true);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const router = useRouter();
 	const { toast } = useToast();
@@ -41,8 +40,6 @@ export default function TemplatesPage() {
 				description: 'Failed to fetch templates',
 				variant: 'destructive',
 			});
-		} finally {
-			setLoading(false);
 		}
 	}
 
@@ -66,14 +63,6 @@ export default function TemplatesPage() {
 		} finally {
 			setDeletingId(null);
 		}
-	}
-
-	if (loading) {
-		return (
-			<div className="flex justify-center items-center min-h-[200px]">
-				<Loader2 className="h-6 w-6 animate-spin" />
-			</div>
-		);
 	}
 
 	return (

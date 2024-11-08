@@ -1,47 +1,59 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useSearchParams, useRouter } from 'next/navigation';
 import WorkoutForm from '@/components/workout-form';
 import axios from 'axios';
 
-export default function NewWorkout() {
-  const router = useRouter();
-  const { templateId } = router.query; // Get templateId from the URL
+export default function NewTemplate() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const workoutId = searchParams.get('workoutId');
 
-  const [templateData, setTemplateData] = useState(null);
+	const [initialData, setInitialData] = useState(null);
+	const [isLoading, setIsLoading] = useState(!!workoutId);
 
-  useEffect(() => {
-    // If there's a templateId in the query, fetch the template data
-    if (templateId) {
-      async function fetchTemplate() {
-        try {
-          const response = await axios.get(`/api/templates/${templateId}`, {
-            withCredentials: true,
-          });
-          setTemplateData(response.data);
-        } catch (error) {
-          console.error('Failed to fetch template:', error);
-        }
-      }
-      fetchTemplate();
-    }
-  }, [templateId]);
+	useEffect(() => {
+		if (workoutId) {
+			async function fetchWorkout() {
+				try {
+					const response = await axios.get(`/api/workouts/${workoutId}`, {
+						withCredentials: true,
+					});
+					setInitialData(response.data);
+				} catch (error) {
+					console.error('Failed to fetch workout:', error);
+				} finally {
+					setIsLoading(false);
+				}
+			}
+			fetchWorkout();
+		}
+	}, [workoutId]);
 
-  const handleSubmit = async (data) => {
-    try {
-      await axios.post('/api/workouts', data, { withCredentials: true });
-      // Navigate to the workout list after successful submission
-      router.push('/workouts');
-    } catch (error) {
-      console.error('Failed to create workout:', error);
-    }
-  };
+	const handleSubmit = async (data) => {
+		try {
+			await axios.post('/api/templates', data, { withCredentials: true });
+			router.push('/templates');
+		} catch (error) {
+			console.error('Failed to create template:', error);
+			throw error; // This will be caught by the WorkoutForm error handling
+		}
+	};
 
-  return (
-    <WorkoutForm
-      initialData={templateData} // Pass the fetched template data as initialData
-      isTemplate={true} // Indicate that this is based on a template
-      onSubmit={handleSubmit}
-    />
-  );
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loader2 className="h-8 w-8 animate-spin" />
+			</div>
+		);
+	}
+
+	return (
+		<WorkoutForm
+			initialData={initialData}
+			isTemplate={true}
+			onSubmit={handleSubmit}
+		/>
+	);
 }
