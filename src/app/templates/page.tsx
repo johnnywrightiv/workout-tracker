@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,6 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+	AlertDialog,
+	AlertDialogTrigger,
+	AlertDialogContent,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogCancel,
+	AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 interface Template {
 	_id: string;
@@ -21,6 +32,9 @@ interface Template {
 export default function TemplatesPage() {
 	const [templates, setTemplates] = useState<Template[]>([]);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+		null
+	); // Store selected template ID for confirmation
 	const router = useRouter();
 	const { toast } = useToast();
 
@@ -62,6 +76,7 @@ export default function TemplatesPage() {
 			});
 		} finally {
 			setDeletingId(null);
+			setSelectedTemplateId(null); // Reset the selected template ID
 		}
 	}
 
@@ -88,18 +103,46 @@ export default function TemplatesPage() {
 									>
 										<Pencil className="h-4 w-4" />
 									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={() => handleDelete(template._id)}
-										disabled={deletingId === template._id}
-									>
-										{deletingId === template._id ? (
-											<Loader2 className="h-4 w-4 animate-spin" />
-										) : (
-											<Trash2 className="h-4 w-4" />
-										)}
-									</Button>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
+												disabled={deletingId === template._id}
+												onClick={() => setSelectedTemplateId(template._id)} // Set the template ID for confirmation
+											>
+												{deletingId === template._id ? (
+													<Loader2 className="h-4 w-4 animate-spin" />
+												) : (
+													<Trash2 className="h-4 w-4" />
+												)}
+											</Button>
+										</AlertDialogTrigger>
+
+										{/* Confirmation Dialog */}
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>Are you sure?</AlertDialogTitle>
+												<AlertDialogDescription>
+													This action cannot be undone. This will permanently
+													delete your template.
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel
+													onClick={() => setSelectedTemplateId(null)} // Reset the selected template ID if canceled
+												>
+													Cancel
+												</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={() => handleDelete(selectedTemplateId!)} // Proceed with delete
+													className="bg-destructive hover:bg-destructive/80"
+												>
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
 								</div>
 							</div>
 						</CardHeader>

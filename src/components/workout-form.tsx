@@ -17,8 +17,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, DumbbellIcon, GripVertical } from 'lucide-react';
 
 const MUSCLE_GROUPS = [
 	'Chest',
@@ -36,16 +42,16 @@ const MUSCLE_GROUPS = [
 
 interface Exercise {
 	name: string;
-	sets: number;
-	reps: number;
-	weight: number;
+	sets: number | null;
+	reps: number | null;
+	weight: number | null;
 	notes: string;
 	muscleGroup: string;
 }
 
 interface FormData {
 	name: string;
-	duration: number;
+	duration: number | null,
 	notes: string;
 	exercises: Exercise[];
 }
@@ -66,14 +72,15 @@ export default function WorkoutForm({
 	const [formData, setFormData] = useState<FormData>(
 		initialData || {
 			name: '',
-			duration: 0,
+			duration: null,
 			notes: '',
 			exercises: [
-				{ name: '', sets: 0, reps: 0, weight: 0, notes: '', muscleGroup: '' },
+				{ name: '', sets: null, reps: null, weight: null, notes: '', muscleGroup: '' },
 			],
 		}
 	);
 	const [isLoading, setIsLoading] = useState(false);
+	const [expandedExercises, setExpandedExercises] = useState<string[]>(['0']); // Start with first exercise expanded
 	const { toast } = useToast();
 	const router = useRouter();
 
@@ -91,6 +98,7 @@ export default function WorkoutForm({
 	};
 
 	const handleAddExercise = () => {
+		const newIndex = formData.exercises.length;
 		setFormData({
 			...formData,
 			exercises: [
@@ -98,6 +106,7 @@ export default function WorkoutForm({
 				{ name: '', sets: 0, reps: 0, weight: 0, notes: '', muscleGroup: '' },
 			],
 		});
+		setExpandedExercises([newIndex.toString()]); // Expand the new exercise
 	};
 
 	const handleRemoveExercise = (index: number) => {
@@ -123,12 +132,6 @@ export default function WorkoutForm({
 			});
 			router.push(isTemplate ? '/templates' : '/');
 		} catch (error) {
-			console.error(
-				`Failed to ${id ? 'update' : 'create'} ${
-					isTemplate ? 'template' : 'workout'
-				}:`,
-				error
-			);
 			toast({
 				title: 'Error',
 				description: `Failed to ${id ? 'update' : 'create'} ${
@@ -143,243 +146,278 @@ export default function WorkoutForm({
 
 	return (
 		<div className="container max-w-2xl mx-auto px-4 py-6">
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-xl md:text-2xl font-bold">
-						{id ? 'Edit' : 'Create'} {isTemplate ? 'Template' : 'Workout'}
-					</CardTitle>
-				</CardHeader>
-				<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmit} className="space-y-6">
+				{/* Basic Info Card */}
+				<Card className="shadow-sm">
+					<CardHeader>
+						<CardTitle className="text-xl md:text-2xl font-bold">
+							{id ? 'Edit' : 'Create'} {isTemplate ? 'Template' : 'Workout'}
+						</CardTitle>
+					</CardHeader>
 					<CardContent className="space-y-4">
-						{/* Name Input */}
-						<div className="space-y-2">
-							<label htmlFor="name" className="text-sm font-medium">
-								Name:
-							</label>
-							<Input
-								id="name"
-								value={formData.name}
-								onChange={(e) =>
-									setFormData({ ...formData, name: e.target.value })
-								}
-								required
-							/>
+						<div className="flex flex-col md:flex-row gap-4">
+							<div className="flex-1 space-y-2">
+								<label htmlFor="name" className="text-sm font-medium">
+									Name:
+								</label>
+								<Input
+									id="name"
+									placeholder="e.g. Leg Day"
+									value={formData.name}
+									onChange={(e) =>
+										setFormData({ ...formData, name: e.target.value })
+									}
+									required
+								/>
+							</div>
+							<div className="md:w-1/3 space-y-2">
+								<label htmlFor="duration" className="text-sm font-medium">
+									Duration (min):
+								</label>
+								<Input
+									id="duration"
+									type="number"
+									placeholder="0"
+									value={formData.duration}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											duration: Number(e.target.value),
+										})
+									}
+									min="0"
+									required
+								/>
+							</div>
 						</div>
-
-						{/* Duration Input */}
-						<div className="space-y-2">
-							<label htmlFor="duration" className="text-sm font-medium">
-								Duration (minutes):
-							</label>
-							<Input
-								id="duration"
-								type="number"
-								value={formData.duration}
-								onChange={(e) =>
-									setFormData({ ...formData, duration: Number(e.target.value) })
-								}
-								min="0"
-								required
-							/>
-						</div>
-
-						{/* Notes Input */}
 						<div className="space-y-2">
 							<label htmlFor="notes" className="text-sm font-medium">
 								Notes:
 							</label>
 							<Textarea
 								id="notes"
+								placeholder="The only bad workout is the one that didn't happen!"
 								value={formData.notes}
 								onChange={(e) =>
 									setFormData({ ...formData, notes: e.target.value })
 								}
-								className="min-h-[100px]"
+								className="min-h-[80px]"
 							/>
 						</div>
-
-						{/* Exercises Section */}
-						<div className="space-y-4">
-							<h3 className="text-lg font-medium">Exercises</h3>
-							{formData.exercises.map((exercise, index) => (
-								<div
-									key={index}
-									className="space-y-4 p-4 bg-secondary/10 rounded-lg"
-								>
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-										{/* Exercise Name and Muscle Group */}
-										<div className="space-y-2">
-											<label
-												htmlFor={`name-${index}`}
-												className="text-sm font-medium"
-											>
-												Exercise:
-											</label>
-											<Input
-												id={`name-${index}`}
-												value={exercise.name}
-												onChange={(e) =>
-													handleExerciseChange(index, 'name', e.target.value)
-												}
-												placeholder="Exercise name"
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<label
-												htmlFor={`muscleGroup-${index}`}
-												className="text-sm font-medium"
-											>
-												Muscle Group:
-											</label>
-											<Select
-												value={exercise.muscleGroup}
-												onValueChange={(value) =>
-													handleExerciseChange(index, 'muscleGroup', value)
-												}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Select muscle group" />
-												</SelectTrigger>
-												<SelectContent>
-													{MUSCLE_GROUPS.map((group) => (
-														<SelectItem key={group} value={group}>
-															{group}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</div>
-									</div>
-
-									{/* Sets, Reps, Weight */}
-									<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-										<div className="space-y-2">
-											<label
-												htmlFor={`sets-${index}`}
-												className="text-sm font-medium"
-											>
-												Sets:
-											</label>
-											<Input
-												id={`sets-${index}`}
-												type="number"
-												value={exercise.sets}
-												onChange={(e) =>
-													handleExerciseChange(
-														index,
-														'sets',
-														Number(e.target.value)
-													)
-												}
-												min="0"
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<label
-												htmlFor={`reps-${index}`}
-												className="text-sm font-medium"
-											>
-												Reps:
-											</label>
-											<Input
-												id={`reps-${index}`}
-												type="number"
-												value={exercise.reps}
-												onChange={(e) =>
-													handleExerciseChange(
-														index,
-														'reps',
-														Number(e.target.value)
-													)
-												}
-												min="0"
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<label
-												htmlFor={`weight-${index}`}
-												className="text-sm font-medium"
-											>
-												Weight (lbs):
-											</label>
-											<Input
-												id={`weight-${index}`}
-												type="number"
-												value={exercise.weight}
-												onChange={(e) =>
-													handleExerciseChange(
-														index,
-														'weight',
-														Number(e.target.value)
-													)
-												}
-												min="0"
-											/>
-										</div>
-									</div>
-
-									{/* Exercise Notes */}
-									<div className="space-y-2">
-										<label
-											htmlFor={`notes-${index}`}
-											className="text-sm font-medium"
-										>
-											Exercise Notes:
-										</label>
-										<Textarea
-											id={`notes-${index}`}
-											value={exercise.notes}
-											onChange={(e) =>
-												handleExerciseChange(index, 'notes', e.target.value)
-											}
-											placeholder="Exercise notes"
-											className="min-h-[60px]"
-										/>
-									</div>
-
-									{/* Remove Exercise Button */}
-									<div className="flex justify-end">
-										<Button
-											type="button"
-											variant="destructive"
-											size="sm"
-											onClick={() => handleRemoveExercise(index)}
-											disabled={formData.exercises.length === 1}
-										>
-											Remove Exercise
-										</Button>
-									</div>
-								</div>
-							))}
-							<Button
-								type="button"
-								variant="outline"
-								onClick={handleAddExercise}
-								className="w-full"
-							>
-								Add Exercise
-							</Button>
-						</div>
 					</CardContent>
-					<CardFooter>
-						<Button type="submit" className="w-full" disabled={isLoading}>
-							{isLoading ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									{id ? 'Updating...' : 'Creating...'}
-								</>
-							) : (
-								`${id ? 'Save' : 'Create'} ${
-									isTemplate ? 'Template' : 'Workout'
-								}`
-							)}
+				</Card>
+
+				{/* Exercises Section */}
+				<div className="space-y-4">
+					<div className="flex items-center justify-between">
+						<h3 className="text-lg font-semibold flex items-center gap-2">
+							<DumbbellIcon className="h-5 w-5" />
+							Exercises
+						</h3>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={handleAddExercise}
+						>
+							Add Exercise
 						</Button>
-					</CardFooter>
-				</form>
-			</Card>
+					</div>
+
+					<Accordion
+						type="multiple"
+						value={expandedExercises}
+						onValueChange={setExpandedExercises}
+						className="space-y-2"
+					>
+						{formData.exercises.map((exercise, index) => (
+							<AccordionItem
+								key={index}
+								value={index.toString()}
+								className="border rounded-lg bg-card shadow-sm"
+							>
+								<AccordionTrigger className="px-4 hover:no-underline">
+									<div className="flex items-center gap-3 w-full">
+										<GripVertical className="h-4 w-4 text-muted-foreground" />
+										<div className="flex-1 text-left">
+											<span className="font-medium">
+												{exercise.name || 'New Exercise'}
+											</span>
+											{exercise.name && (
+												<span className="text-sm text-muted-foreground ml-2">
+													{exercise.sets} x {exercise.reps} @ {exercise.weight}
+													lbs
+												</span>
+											)}
+										</div>
+									</div>
+								</AccordionTrigger>
+								<AccordionContent className="px-4 pb-4">
+									<div className="space-y-4">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div className="space-y-2">
+												<label
+													htmlFor={`name-${index}`}
+													className="text-sm font-medium"
+												>
+													Exercise Name:
+												</label>
+												<Input
+													id={`name-${index}`}
+													value={exercise.name}
+													onChange={(e) =>
+														handleExerciseChange(index, 'name', e.target.value)
+													}
+													placeholder="e.g., Bench Press"
+													required
+												/>
+											</div>
+											<div className="space-y-2">
+												<label
+													htmlFor={`muscleGroup-${index}`}
+													className="text-sm font-medium"
+												>
+													Muscle Group:
+												</label>
+												<Select
+													value={exercise.muscleGroup}
+													onValueChange={(value) =>
+														handleExerciseChange(index, 'muscleGroup', value)
+													}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select muscle group" />
+													</SelectTrigger>
+													<SelectContent>
+														{MUSCLE_GROUPS.map((group) => (
+															<SelectItem key={group} value={group}>
+																{group}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+										</div>
+
+										<div className="grid grid-cols-3 gap-4">
+											<div className="space-y-2">
+												<label
+													htmlFor={`sets-${index}`}
+													className="text-sm font-medium"
+												>
+													Sets:
+												</label>
+												<Input
+													id={`sets-${index}`}
+													placeholder="0"
+													type="number"
+													value={exercise.sets}
+													onChange={(e) =>
+														handleExerciseChange(
+															index,
+															'sets',
+															Number(e.target.value)
+														)
+													}
+													min="0"
+													required
+												/>
+											</div>
+											<div className="space-y-2">
+												<label
+													htmlFor={`reps-${index}`}
+													className="text-sm font-medium"
+												>
+													Reps:
+												</label>
+												<Input
+													id={`reps-${index}`}
+													type="number"
+													placeholder="0"
+													value={exercise.reps}
+													onChange={(e) =>
+														handleExerciseChange(
+															index,
+															'reps',
+															Number(e.target.value)
+														)
+													}
+													min="0"
+													required
+												/>
+											</div>
+											<div className="space-y-2">
+												<label
+													htmlFor={`weight-${index}`}
+													className="text-sm font-medium"
+												>
+													Weight:
+												</label>
+												<Input
+													id={`weight-${index}`}
+													type="number"
+													placeholder="0"
+													value={exercise.weight}
+													onChange={(e) =>
+														handleExerciseChange(
+															index,
+															'weight',
+															Number(e.target.value)
+														)
+													}
+													min="0"
+												/>
+											</div>
+										</div>
+
+										<div className="space-y-2">
+											<label
+												htmlFor={`notes-${index}`}
+												className="text-sm font-medium"
+											>
+												Notes:
+											</label>
+											<Textarea
+												id={`notes-${index}`}
+												value={exercise.notes}
+												onChange={(e) =>
+													handleExerciseChange(index, 'notes', e.target.value)
+												}
+												placeholder="Any specific instructions or notes"
+												className="min-h-[60px]"
+											/>
+										</div>
+
+										<div className="flex justify-end">
+											<Button
+												type="button"
+												variant="destructive"
+												size="sm"
+												onClick={() => handleRemoveExercise(index)}
+												disabled={formData.exercises.length === 1}
+											>
+												Remove Exercise
+											</Button>
+										</div>
+									</div>
+								</AccordionContent>
+							</AccordionItem>
+						))}
+					</Accordion>
+				</div>
+
+				{/* Submit Button */}
+				<Button type="submit" className="w-full" disabled={isLoading}>
+					{isLoading ? (
+						<>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							{id ? 'Updating...' : 'Creating...'}
+						</>
+					) : (
+						`${id ? 'Save' : 'Create'} ${isTemplate ? 'Template' : 'Workout'}`
+					)}
+				</Button>
+			</form>
 		</div>
 	);
 }
