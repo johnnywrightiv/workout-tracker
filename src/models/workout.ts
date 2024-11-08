@@ -5,25 +5,30 @@ const exerciseSchema = new mongoose.Schema({
     sets: Number,
     reps: Number,
     weight: Number,
-    notes: String
+    notes: String,
+    muscleGroup: String,
 });
 
 const workoutSchema = new mongoose.Schema({
-    user_id: {
-        type: String,  // Changed from ObjectId to be more flexible
-        required: true,
-        ref: 'User'
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    duration: {
-        type: Number,
-        required: true
-    },
-    notes: String,
-    exercises: [exerciseSchema]
+	user_id: {
+		type: String,
+		required: true,
+		ref: 'User',
+	},
+	name: {
+		type: String,
+		required: true,
+	},
+	date: {
+		type: Date,
+		required: true,
+	},
+	duration: {
+		type: Number,
+		required: true,
+	},
+	notes: String,
+	exercises: [exerciseSchema],
 });
 
 const Workout = mongoose.models.Workout || mongoose.model('Workout', workoutSchema);

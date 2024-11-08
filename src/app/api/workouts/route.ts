@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     const workout = new Workout({
         user_id: user.userId,
         date: new Date(),
+        name: data.name,
         duration: data.duration,
         notes: data.notes,
         exercises: data.exercises || [] // Handle exercises data

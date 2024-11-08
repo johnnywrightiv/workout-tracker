@@ -110,6 +110,7 @@ export default function Home() {
 				{workouts.map((workout) => (
 					<Card key={workout._id}>
 						<CardHeader>
+							<h1 className='text-3xl'>Name: {workout.name}</h1>
 							<CardTitle>{new Date(workout.date).toLocaleString()}</CardTitle>
 						</CardHeader>
 						<CardContent>
