@@ -33,6 +33,8 @@ import {
 	Filter,
 	SortAsc,
 	MoreVertical,
+	UserPlus,
+	LogIn
 } from 'lucide-react';
 import {
 	DropdownMenu,
@@ -93,18 +95,29 @@ export default function Home() {
 					Welcome to Your Workout Tracker
 				</h2>
 				<p className="text-xl mb-8">
-					Please log in to view and manage your workouts.
+					Please log in or sign up to view and manage your workouts.
 				</p>
-				<Button asChild size="lg">
-					<Link href="/login">Log In</Link>
-				</Button>
+				<div className="space-x-4">
+					<Button variant="ghost" asChild>
+						<Link href="/signup" className="flex items-center space-x-2">
+							<UserPlus className="h-4 w-4" />
+							<span>Sign Up</span>
+						</Link>
+					</Button>
+					<Button variant="default" asChild>
+						<Link href="/login" className="flex items-center space-x-2">
+							<LogIn className="h-4 w-4" />
+							<span>Login</span>
+						</Link>
+					</Button>
+				</div>
 			</div>
 		);
 	}
 
 	return (
 		<div className="container mx-auto py-8 px-4 space-y-8">
-			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+			<div className="flex flex-row justify-between items-center gap-4 w-full">
 				<h1 className="text-3xl sm:text-4xl font-bold">Past Workouts</h1>
 				<div className="flex space-x-4">
 					<Button variant="outline" size="sm" onClick={handleFilter}>
