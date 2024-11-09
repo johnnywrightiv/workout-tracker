@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { useTheme } from 'next-themes';
@@ -13,7 +14,12 @@ import {
 	DropdownMenuTrigger,
 	DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+	Sheet,
+	SheetContent,
+	SheetTitle,
+	SheetTrigger,
+} from '@/components/ui/sheet';
 import {
 	Home,
 	LogIn,
@@ -34,6 +40,15 @@ export default function Navbar() {
 		(state: RootState) => state.auth
 	);
 	const { theme, setTheme } = useTheme();
+
+	// State to manage Sheet visibility
+	const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+	// Close the Sheet when the pathname changes (i.e., navigation occurs)
+	useEffect(() => {
+		// Close the sheet on navigation
+		setIsSheetOpen(false);
+	}, [pathname]);
 
 	const navItems = [
 		{ href: '/', label: 'Home', icon: Home },
@@ -82,7 +97,7 @@ export default function Navbar() {
 						)}
 
 						{/* Mobile Menu Toggle */}
-						<Sheet>
+						<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
 							<SheetTrigger asChild>
 								<Button variant="ghost" size="icon" className="md:hidden">
 									<Menu className="h-5 w-5" />
@@ -91,8 +106,8 @@ export default function Navbar() {
 							</SheetTrigger>
 
 							{/* Mobile Menu Content */}
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-							<SheetTitle className='mb-2'>Workout Tracker</SheetTitle>
+							<SheetContent side="right" className="w-[300px] sm:w-[400px]">
+								<SheetTitle className="mb-2">Workout Tracker</SheetTitle>
 								<nav className="flex flex-col space-y-4">
 									{navItems.map((item) => {
 										if (item.authRequired && !isAuthenticated) return null;

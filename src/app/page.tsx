@@ -203,12 +203,17 @@ export default function Home() {
 											<h4 className="font-semibold mb-2">{muscleGroup}</h4>
 											<ul className="space-y-1">
 												{exercises.map((exercise, index) => (
-													<li key={index} className="flex items-center">
-														<Circle className="mr-2 h-1 w-1 bg-foreground rounded-full flex-shrink-0" />
-														<span className="text-sm">
-															{exercise.name}: {exercise.sets} × {exercise.reps}{' '}
-															@ {exercise.weight}lbs
-														</span>
+													<li key={index} className="flex flex-col">
+														<div className="flex items-center space-x-2">
+															<Circle className="mr-2 h-1 w-1 bg-foreground rounded-full flex-shrink-0" />
+															<div className="text-sm">
+																{exercise.name}: {exercise.sets} ×{' '}
+																{exercise.reps} @ {exercise.weight}lbs
+															</div>
+														</div>
+														<div className="text-sm text-muted-foreground ml-6">
+															{exercise.notes}
+														</div>
 													</li>
 												))}
 											</ul>

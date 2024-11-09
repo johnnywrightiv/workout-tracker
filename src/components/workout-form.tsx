@@ -24,7 +24,7 @@ import {
 	AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, DumbbellIcon, GripVertical } from 'lucide-react';
+import { Loader2, DumbbellIcon, GripVertical, InfoIcon } from 'lucide-react';
 
 const MUSCLE_GROUPS = [
 	'Chest',
@@ -42,16 +42,16 @@ const MUSCLE_GROUPS = [
 
 interface Exercise {
 	name: string;
-	sets: number | null;
-	reps: number | null;
-	weight: number | null;
+	sets: number | undefined;
+	reps: number | undefined;
+	weight: number | undefined;
 	notes: string;
 	muscleGroup: string;
 }
 
 interface FormData {
 	name: string;
-	duration: number | null,
+	duration: number | undefined;
 	notes: string;
 	exercises: Exercise[];
 }
@@ -72,15 +72,25 @@ export default function WorkoutForm({
 	const [formData, setFormData] = useState<FormData>(
 		initialData || {
 			name: '',
-			duration: null,
+			duration: undefined,
 			notes: '',
 			exercises: [
-				{ name: '', sets: null, reps: null, weight: null, notes: '', muscleGroup: '' },
+				{
+					name: '',
+					sets: undefined,
+					reps: undefined,
+					weight: undefined,
+					notes: '',
+					muscleGroup: '',
+				},
 			],
 		}
 	);
 	const [isLoading, setIsLoading] = useState(false);
-	const [expandedExercises, setExpandedExercises] = useState<string[]>(['0']); // Start with first exercise expanded
+	const [expandedExercises, setExpandedExercises] = useState<string[]>(['0']);
+	const [expandedSections, setExpandedSections] = useState<string[]>([
+		'details',
+	]); 
 	const { toast } = useToast();
 	const router = useRouter();
 
@@ -103,10 +113,17 @@ export default function WorkoutForm({
 			...formData,
 			exercises: [
 				...formData.exercises,
-				{ name: '', sets: 0, reps: 0, weight: 0, notes: '', muscleGroup: '' },
+				{
+					name: '',
+					sets: undefined,
+					reps: undefined,
+					weight: undefined,
+					notes: '',
+					muscleGroup: '',
+				},
 			],
 		});
-		setExpandedExercises([newIndex.toString()]); // Expand the new exercise
+		setExpandedExercises([newIndex.toString()]);
 	};
 
 	const handleRemoveExercise = (index: number) => {
@@ -147,66 +164,85 @@ export default function WorkoutForm({
 	return (
 		<div className="container max-w-2xl mx-auto px-4 py-6">
 			<form onSubmit={handleSubmit} className="space-y-6">
-				{/* Basic Info Card */}
-				<Card className="shadow-sm">
-					<CardHeader>
-						<CardTitle className="text-xl md:text-2xl font-bold">
-							{id ? 'Edit' : 'Create'} {isTemplate ? 'Template' : 'Workout'}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="flex flex-col md:flex-row gap-4">
-							<div className="flex-1 space-y-2">
-								<label htmlFor="name" className="text-sm font-medium">
-									Name:
-								</label>
-								<Input
-									id="name"
-									placeholder="e.g. Leg Day"
-									value={formData.name}
-									onChange={(e) =>
-										setFormData({ ...formData, name: e.target.value })
-									}
-									required
-								/>
+				<div className="text-xl md:text-2xl font-bold">
+					{id ? 'Edit' : 'Create'} {isTemplate ? 'Template' : 'Workout'}
+				</div>
+				{/* Details Section */}
+				<Accordion
+					type="multiple"
+					value={expandedSections}
+					onValueChange={setExpandedSections}
+					className="space-y-2"
+				>
+					<AccordionItem value="details" className="border rounded-lg bg-card">
+						<AccordionTrigger className="px-4 hover:no-underline">
+							<div className="flex items-center gap-3 w-full">
+								<InfoIcon className="h-4 w-4 text-muted-foreground" />
+								<div className="flex-1 text-left">
+									<span className="font-medium">Details</span>
+									{formData.name && (
+										<span className="text-sm text-muted-foreground ml-2">
+											{formData.name} • {formData.duration} min
+										</span>
+									)}
+								</div>
 							</div>
-							<div className="md:w-1/3 space-y-2">
-								<label htmlFor="duration" className="text-sm font-medium">
-									Duration (min):
-								</label>
-								<Input
-									id="duration"
-									type="number"
-									placeholder="0"
-									value={formData.duration}
-									onChange={(e) =>
-										setFormData({
-											...formData,
-											duration: Number(e.target.value),
-										})
-									}
-									min="0"
-									required
-								/>
+						</AccordionTrigger>
+						<AccordionContent className="px-4 pb-4">
+							<div className="space-y-4">
+								<div className="flex flex-col md:flex-row gap-4">
+									<div className="flex-1 space-y-2">
+										<label htmlFor="name" className="text-sm font-medium">
+											Name:
+										</label>
+										<Input
+											id="name"
+											placeholder="e.g. Leg Day"
+											value={formData.name}
+											onChange={(e) =>
+												setFormData({ ...formData, name: e.target.value })
+											}
+											required
+										/>
+									</div>
+									<div className="md:w-1/3 space-y-2">
+										<label htmlFor="duration" className="text-sm font-medium">
+											Duration (min):
+										</label>
+										<Input
+											id="duration"
+											type="number"
+											placeholder="0"
+											value={formData.duration}
+											onChange={(e) =>
+												setFormData({
+													...formData,
+													duration: Number(e.target.value),
+												})
+											}
+											min="0"
+											required
+										/>
+									</div>
+								</div>
+								<div className="space-y-2">
+									<label htmlFor="notes" className="text-sm font-medium">
+										Notes:
+									</label>
+									<Textarea
+										id="notes"
+										placeholder="The only bad workout is the one that didn't happen!"
+										value={formData.notes}
+										onChange={(e) =>
+											setFormData({ ...formData, notes: e.target.value })
+										}
+										className="min-h-[80px]"
+									/>
+								</div>
 							</div>
-						</div>
-						<div className="space-y-2">
-							<label htmlFor="notes" className="text-sm font-medium">
-								Notes:
-							</label>
-							<Textarea
-								id="notes"
-								placeholder="The only bad workout is the one that didn't happen!"
-								value={formData.notes}
-								onChange={(e) =>
-									setFormData({ ...formData, notes: e.target.value })
-								}
-								className="min-h-[80px]"
-							/>
-						</div>
-					</CardContent>
-				</Card>
-
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
 				{/* Exercises Section */}
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
@@ -241,13 +277,23 @@ export default function WorkoutForm({
 										<GripVertical className="h-4 w-4 text-muted-foreground" />
 										<div className="flex-1 text-left">
 											<span className="font-medium">
-												{exercise.name || 'New Exercise'}
+												{exercise.name || 'New Exercise'}:
 											</span>
+
 											{exercise.name && (
-												<span className="text-sm text-muted-foreground ml-2">
-													{exercise.sets} x {exercise.reps} @ {exercise.weight}
-													lbs
-												</span>
+												<>
+													<span className="text-sm ml-2">
+														{exercise.sets} x {exercise.reps} @{' '}
+														{exercise.weight} lbs
+													</span>
+
+													{exercise.notes && (
+														<span className="text-sm text-muted-foreground mt-1">
+															{' - '}
+															{exercise.notes}
+														</span>
+													)}
+												</>
 											)}
 										</div>
 									</div>
@@ -268,7 +314,7 @@ export default function WorkoutForm({
 													onChange={(e) =>
 														handleExerciseChange(index, 'name', e.target.value)
 													}
-													placeholder="e.g., Bench Press"
+													placeholder="e.g. Bench Press"
 													required
 												/>
 											</div>
@@ -286,7 +332,13 @@ export default function WorkoutForm({
 													}
 												>
 													<SelectTrigger>
-														<SelectValue placeholder="Select muscle group" />
+														<SelectValue
+															placeholder={
+																<span className="text-muted-foreground">
+																	Select muscle group
+																</span>
+															}
+														/>
 													</SelectTrigger>
 													<SelectContent>
 														{MUSCLE_GROUPS.map((group) => (
@@ -309,8 +361,8 @@ export default function WorkoutForm({
 												</label>
 												<Input
 													id={`sets-${index}`}
-													placeholder="0"
 													type="number"
+													placeholder="0"
 													value={exercise.sets}
 													onChange={(e) =>
 														handleExerciseChange(
@@ -405,7 +457,6 @@ export default function WorkoutForm({
 						))}
 					</Accordion>
 				</div>
-
 				{/* Submit Button */}
 				<Button type="submit" className="w-full" disabled={isLoading}>
 					{isLoading ? (
