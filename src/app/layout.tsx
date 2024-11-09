@@ -42,7 +42,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <Navbar />
-              <div className="mt-16">
+              <div>
                 <div className="hidden lg:block">{/* <Sidebar /> */}</div>
                 <main className="">{children}</main>
               </div>

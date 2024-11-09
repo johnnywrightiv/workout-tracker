@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -34,7 +34,7 @@ export default function TemplatesPage() {
 	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
 		null
-	); // Store selected template ID for confirmation
+	);
 	const router = useRouter();
 	const { toast } = useToast();
 
@@ -67,7 +67,7 @@ export default function TemplatesPage() {
 				title: 'Success',
 				description: 'Template deleted successfully',
 			});
-			fetchTemplates(); // Refresh the list
+			fetchTemplates();
 		} catch (error) {
 			toast({
 				title: 'Error',
@@ -76,25 +76,27 @@ export default function TemplatesPage() {
 			});
 		} finally {
 			setDeletingId(null);
-			setSelectedTemplateId(null); // Reset the selected template ID
+			setSelectedTemplateId(null);
 		}
 	}
 
 	return (
-		<div className="container max-w-4xl mx-auto px-4 py-6">
-			<div className="flex justify-between items-center mb-6">
-				<h1 className="text-2xl font-bold">Workout Templates</h1>
+		<div className="container mx-auto py-8 px-4 space-y-8">
+			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+				<h1 className="text-3xl sm:text-4xl font-bold">Templates</h1>
 				<Button onClick={() => router.push('/templates/new')}>
 					Create Template
 				</Button>
 			</div>
 
-			<div className="grid gap-4">
+			<div className="space-y-6">
 				{templates.map((template) => (
-					<Card key={template._id}>
-						<CardHeader>
-							<div className="flex justify-between items-center">
-								<CardTitle className="text-xl">{template.name}</CardTitle>
+					<Card key={template._id} className="w-full">
+						<CardHeader className="flex flex-col">
+							<div className="flex justify-between items-start w-full">
+								<CardTitle className="text-2xl font-bold">
+									{template.name}
+								</CardTitle>
 								<div className="flex gap-2">
 									<Button
 										variant="ghost"
@@ -109,7 +111,7 @@ export default function TemplatesPage() {
 												variant="ghost"
 												size="icon"
 												disabled={deletingId === template._id}
-												onClick={() => setSelectedTemplateId(template._id)} // Set the template ID for confirmation
+												onClick={() => setSelectedTemplateId(template._id)}
 											>
 												{deletingId === template._id ? (
 													<Loader2 className="h-4 w-4 animate-spin" />
@@ -119,7 +121,6 @@ export default function TemplatesPage() {
 											</Button>
 										</AlertDialogTrigger>
 
-										{/* Confirmation Dialog */}
 										<AlertDialogContent>
 											<AlertDialogHeader>
 												<AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -130,12 +131,12 @@ export default function TemplatesPage() {
 											</AlertDialogHeader>
 											<AlertDialogFooter>
 												<AlertDialogCancel
-													onClick={() => setSelectedTemplateId(null)} // Reset the selected template ID if canceled
+													onClick={() => setSelectedTemplateId(null)}
 												>
 													Cancel
 												</AlertDialogCancel>
 												<AlertDialogAction
-													onClick={() => handleDelete(selectedTemplateId!)} // Proceed with delete
+													onClick={() => handleDelete(selectedTemplateId!)}
 													className="bg-destructive hover:bg-destructive/80"
 												>
 													Delete
@@ -147,12 +148,10 @@ export default function TemplatesPage() {
 							</div>
 						</CardHeader>
 						<CardContent>
-							<p className="text-sm text-muted-foreground">
-								Duration: {template.duration} minutes
-							</p>
-							<p className="text-sm text-muted-foreground">
-								Exercises: {template.exercises.length}
-							</p>
+							<div className="flex flex-col space-y-1 text-muted-foreground">
+								<p>Duration: {template.duration} minutes</p>
+								<p>Exercises: {template.exercises.length}</p>
+							</div>
 						</CardContent>
 					</Card>
 				))}
