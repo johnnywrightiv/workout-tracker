@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import WorkoutForm from '@/components/workout-form';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
@@ -10,7 +10,6 @@ export default function EditWorkout() {
 	const [workout, setWorkout] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const params = useParams();
-	const router = useRouter();
 	const id = params.id;
 
 	useEffect(() => {

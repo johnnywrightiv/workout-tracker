@@ -3,12 +3,15 @@ import connectToDatabase from '@/lib/mongoose';
 import Template from '@/models/template';
 import { verifyAuth } from '@/middleware/verify-auth';
 
-export async function GET(
-	req: NextRequest,
-	{ params }: { params: { id: string } }
-) {
+type Props = {
+	params: {
+		id: string;
+	};
+};
+
+export async function GET(request: NextRequest, props: Props) {
 	// Verify the user's authentication
-	const user = verifyAuth(req);
+	const user = verifyAuth(request);
 	if (!user) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
@@ -18,7 +21,7 @@ export async function GET(
 
 	// Fetch the template based on userId and templateId
 	const template = await Template.findOne({
-		_id: params.id,
+		_id: props.params.id,
 		user_id: user.userId,
 	});
 
@@ -34,24 +37,37 @@ export async function GET(
 	return NextResponse.json(template);
 }
 
-export async function PUT(
-	req: NextRequest,
-	{ params }: { params: { id: string } }
-) {
-	const user = verifyAuth(req);
+export async function PUT(request: NextRequest, props: Props) {
+	const user = verifyAuth(request);
 	if (!user) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
 
 	await connectToDatabase();
-	const data = await req.json();
+	const data = await request.json();
+
+	// Define the exercise interface
+	interface Exercise {
+		name: string;
+		sets?: number;
+		reps?: number;
+		weight?: number;
+		notes?: string;
+		muscleGroup?: string;
+		weightType?: string;
+		equipmentSettings?: string;
+		duration?: number;
+		exerciseType?: string;
+		speed?: number;
+		distance?: number;
+	}
 
 	// Prepare the update data with all fields
 	const updateData = {
 		name: data.name,
 		duration: data.duration,
 		notes: data.notes,
-		exercises: data.exercises.map((exercise: any) => ({
+		exercises: data.exercises.map((exercise: Exercise) => ({
 			name: exercise.name,
 			sets: exercise.sets,
 			reps: exercise.reps,
@@ -68,7 +84,7 @@ export async function PUT(
 	};
 
 	const template = await Template.findOneAndUpdate(
-		{ _id: params.id, user_id: user.userId },
+		{ _id: props.params.id, user_id: user.userId },
 		{ $set: updateData },
 		{ new: true }
 	);
@@ -83,12 +99,9 @@ export async function PUT(
 	return NextResponse.json(template);
 }
 
-export async function DELETE(
-	req: NextRequest,
-	{ params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: Props) {
 	// Verify the user's authentication
-	const user = verifyAuth(req);
+	const user = verifyAuth(request);
 	if (!user) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
@@ -98,7 +111,7 @@ export async function DELETE(
 
 	// Find and delete the template based on ID and user ID
 	const template = await Template.findOneAndDelete({
-		_id: params.id,
+		_id: props.params.id,
 		user_id: user.userId,
 	});
 

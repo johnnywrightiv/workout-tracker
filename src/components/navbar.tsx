@@ -81,7 +81,9 @@ export default function Navbar() {
 							{/* Mobile Menu Content */}
 							<SheetContent side="right" className="w-[300px] sm:w-[400px]">
 								<SheetTitle>Workout Tracker</SheetTitle>
-								<SheetDescription className='mb-4'>Navigation Menu</SheetDescription>
+								<SheetDescription className="mb-4">
+									Navigation Menu
+								</SheetDescription>
 								<nav className="flex flex-col space-y-4">
 									{navItems.map((item) => {
 										if (item.authRequired && !isAuthenticated) return null;

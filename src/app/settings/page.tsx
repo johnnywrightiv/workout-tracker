@@ -4,10 +4,9 @@ import { ColorSchemeSelect } from '@/components/color-scheme-select';
 import LogoutButton from '@/components/logout-button';
 import { ThemeSelect } from '@/components/theme-selector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Palette, UserPlus, LogIn } from 'lucide-react';
+import { Settings, Palette } from 'lucide-react';
 
 export default function SettingsPage() {
-
 	return (
 		<div className="container mx-auto py-8 px-4 space-y-8">
 			<div className="flex flex-row justify-between items-center gap-4 w-full">

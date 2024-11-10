@@ -7,7 +7,7 @@ import { logout } from '@/store/auth-slice';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
-const LogoutButton = ({ variant = 'dropdown' }) => {
+const LogoutButton = () => {
 	const dispatch = useDispatch();
 	const router = useRouter();
 

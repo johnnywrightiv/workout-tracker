@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
 
 export async function POST(req: NextRequest) {
-  try {
+	try {
 		// First connect to database
 		await connectToDatabase();
 
@@ -59,10 +59,10 @@ export async function POST(req: NextRequest) {
 
 		return response;
 	} catch (error) {
-    console.error('Signup error:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+		console.error('Signup error:', error);
+		return NextResponse.json(
+			{ message: 'Internal server error' },
+			{ status: 500 }
+		);
+	}
 }

@@ -8,6 +8,7 @@ interface Exercise {
 	weight: number;
 }
 
+// eslint-disable-next-line no-unused-vars
 interface Workout {
 	_id: string;
 	user_id: string;
@@ -16,18 +17,6 @@ interface Workout {
 	notes: string;
 	exercises: Exercise[];
 }
-
-interface WorkoutsState {
-	items: Workout[];
-	loading: boolean;
-	error: string | null;
-}
-
-const initialState: WorkoutsState = {
-	items: [],
-	loading: false,
-	error: null,
-};
 
 // Async thunk for fetching workouts
 export const fetchWorkouts = createAsyncThunk(

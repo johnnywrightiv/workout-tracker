@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Palette } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import {

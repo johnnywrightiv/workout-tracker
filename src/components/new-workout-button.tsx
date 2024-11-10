@@ -40,9 +40,6 @@ export default function WorkoutButton() {
 
 	const handleTemplateSelect = async (templateId: string) => {
 		try {
-			const response = await axios.get(`/api/templates/${templateId}`, {
-				withCredentials: true,
-			});
 			// Navigate to new workout form with template data
 			router.push(`/workout/new?template=${templateId}`);
 		} catch (error) {

@@ -10,7 +10,6 @@ import {
 	clearWorkouts,
 } from '@/store/workouts-slice';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -80,7 +79,6 @@ import {
 
 export default function Component() {
 	const dispatch = useDispatch<AppDispatch>();
-	const router = useRouter();
 	const { items: workouts } = useSelector((state: RootState) => state.workouts);
 	const isAuthenticated = useSelector(
 		(state: RootState) => state.auth.isAuthenticated
@@ -88,15 +86,6 @@ export default function Component() {
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
-	const [filters, setFilters] = useState({
-		exerciseTypes: new Set<string>(),
-		muscleGroups: new Set<string>(),
-		weightTypes: new Set<string>(),
-		dateRange: {
-			from: undefined as Date | undefined,
-			to: undefined as Date | undefined,
-		},
-	});
 	const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 	const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
 
@@ -157,7 +146,7 @@ export default function Component() {
 		});
 
 		setFilteredWorkouts(filtered);
-	}, [workouts, filters, sortOrder]);
+	}, [workouts, Filter, sortOrder]);
 
 	const handleDelete = async (workoutId: string) => {
 		try {
@@ -223,10 +212,7 @@ export default function Component() {
 					<div className="flex gap-2 w-1/2 sm:w-auto justify-end">
 						<Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
 							<SheetTrigger asChild>
-								<Button
-									variant="outline"
-									className="sm:w-auto w-full"
-								>
+								<Button variant="outline" className="sm:w-auto w-full">
 									<Filter className="mr-2 h-4 w-4" />
 									Filter
 								</Button>
@@ -235,7 +221,9 @@ export default function Component() {
 								<SheetHeader>
 									<SheetTitle>Filter Workouts</SheetTitle>
 								</SheetHeader>
-								<SheetDescription>Configure options to filter your workouts </SheetDescription>
+								<SheetDescription>
+									Configure options to filter your workouts{' '}
+								</SheetDescription>
 								<div className="py-4 space-y-6">
 									<div className="space-y-4">
 										<Label>Date Range</Label>
@@ -475,19 +463,22 @@ export default function Component() {
 								<div className="space-y-4">
 									{/* Group by Muscle Group and Cardio */}
 									{Object.entries(
-										workout.exercises.reduce((acc, exercise) => {
-											// Add cardio as a "muscle group" to categorize exercises
-											const group =
-												exercise.exerciseType === 'Cardio'
-													? 'Cardio'
-													: exercise.muscleGroup;
+										workout.exercises.reduce(
+											(acc, exercise) => {
+												// Add cardio as a "muscle group" to categorize exercises
+												const group =
+													exercise.exerciseType === 'Cardio'
+														? 'Cardio'
+														: exercise.muscleGroup;
 
-											if (!acc[group]) {
-												acc[group] = [];
-											}
-											acc[group].push(exercise);
-											return acc;
-										}, {} as Record<string, typeof workout.exercises>)
+												if (!acc[group]) {
+													acc[group] = [];
+												}
+												acc[group].push(exercise);
+												return acc;
+											},
+											{} as Record<string, typeof workout.exercises>
+										)
 									).map(([category, exercises]) => (
 										<div key={category}>
 											{/* Header for Muscle Groups or Cardio */}
@@ -515,10 +506,10 @@ export default function Component() {
 																) : (
 																	// Cardio Exercise Display
 																	<span>
-																			{' '}{exercise.duration} mins.{' | '}
-																			{exercise.distance}{' '}miles |
-																			Speed: {exercise.speed}
-																			
+																		{' '}
+																		{exercise.duration} mins.{' | '}
+																		{exercise.distance} miles | Speed:{' '}
+																		{exercise.speed}
 																	</span>
 																)}
 															</div>

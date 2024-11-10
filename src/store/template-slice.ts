@@ -90,13 +90,11 @@ const templatesSlice = createSlice({
 	extraReducers: (builder) => {
 		builder
 			// Fetch templates
-			.addCase(fetchTemplates.pending, (state) => {
-			})
+			.addCase(fetchTemplates.pending, () => {})
 			.addCase(fetchTemplates.fulfilled, (state, action) => {
 				state.items = action.payload;
 			})
-			.addCase(fetchTemplates.rejected, (state, action) => {
-			})
+			.addCase(fetchTemplates.rejected, () => {})
 			// Create template
 			.addCase(createTemplate.fulfilled, (state, action) => {
 				state.items.push(action.payload);

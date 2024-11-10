@@ -4,14 +4,11 @@ import { verifyAuth } from '@/middleware/verify-auth';
 export async function GET(req: NextRequest) {
 	try {
 		const user = await verifyAuth(req);
-
 		if (user) {
 			return NextResponse.json({
 				isAuthenticated: true,
 				user: {
 					userId: user.userId,
-					name: user.name,
-					email: user.email,
 				},
 			});
 		}

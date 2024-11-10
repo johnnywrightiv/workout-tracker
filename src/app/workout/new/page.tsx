@@ -20,6 +20,7 @@ export default function CreateWorkout() {
 						withCredentials: true,
 					});
 					// Remove template-specific fields if any
+					// eslint-disable-next-line no-unused-vars
 					const { _id, createdAt, updatedAt, userId, ...templateData } =
 						response.data;
 					setInitialData(templateData);
