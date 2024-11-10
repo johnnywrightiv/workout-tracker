@@ -24,11 +24,12 @@ import {
 	GripVertical,
 	InfoIcon,
 	ClockIcon,
+	BikeIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const MUSCLE_GROUPS = [
+export const MUSCLE_GROUPS = [
 	'Chest',
 	'Back',
 	'Shoulders',
@@ -41,7 +42,8 @@ const MUSCLE_GROUPS = [
 	'Calves',
 	'Misc',
 ] as const;
-const WEIGHT_TYPES = [
+
+export const WEIGHT_TYPES = [
 	'Dumbbell',
 	'Barbell',
 	'Kettlebell',
@@ -51,7 +53,8 @@ const WEIGHT_TYPES = [
 	'Bodyweight',
 	'Misc',
 ] as const;
-const EXERCISE_TYPES = ['Strength', 'Cardio'] as const;
+
+export const EXERCISE_TYPES = ['Strength', 'Cardio'] as const;
 
 interface Exercise {
 	name: string;
@@ -89,18 +92,23 @@ const IncrementDecrementButton = ({
 	onChange,
 	min = 0,
 	step = 1,
+	allowDecimals = false,
 }: {
 	value: number;
 	onChange: (value: number) => void;
 	min?: number;
 	step?: number;
+	allowDecimals?: boolean;
 }) => (
 	<div className="flex items-center">
 		<Button
 			type="button"
 			variant="outline"
 			size="icon"
-			onClick={() => onChange(Math.max(min, value - step))}
+			onClick={() => {
+				const newValue = Number((Math.max(min, value - step)).toFixed(2));
+				onChange(newValue);
+			}}
 			disabled={value <= min}
 			className="h-8 w-8"
 		>
@@ -110,20 +118,23 @@ const IncrementDecrementButton = ({
 			type="number"
 			value={value}
 			onChange={(e) => {
-				const newValue =
-					e.target.value === ''
-						? min
-						: Math.max(min, parseFloat(e.target.value));
-				onChange(isNaN(newValue) ? min : newValue);
+				const newValue = e.target.value === ''
+					? min
+					: Math.max(min, parseFloat(e.target.value));
+				onChange(allowDecimals ? Number(newValue.toFixed(2)) : Math.floor(newValue));
 			}}
 			className="flex w-16 h-8 text-center mx-1"
 			min={min}
+			step={allowDecimals ? "0.01" : "1"}
 		/>
 		<Button
 			type="button"
 			variant="outline"
 			size="icon"
-			onClick={() => onChange(value + step)}
+			onClick={() => {
+				const newValue = Number((value + step).toFixed(2));
+				onChange(newValue);
+			}}
 			className="h-8 w-8"
 		>
 			+
@@ -140,7 +151,7 @@ export default function WorkoutForm({
 	const [formData, setFormData] = useState<FormData>(
 		initialData || {
 			name: '',
-			startTime: new Date().toISOString(),
+			startTime: '',
 			endTime: '',
 			duration: 0,
 			notes: '',
@@ -171,14 +182,18 @@ export default function WorkoutForm({
 		type: 'success' | 'error';
 		message: string;
 	} | null>(null);
+	const [workoutStatus, setWorkoutStatus] = useState<
+		'not_started' | 'in_progress' | 'completed'
+	>('not_started');
 	const router = useRouter();
 
 	useEffect(() => {
-		if (!initialData) {
-			setFormData((prevData) => ({
-				...prevData,
-				startTime: new Date().toISOString(),
-			}));
+		if (initialData) {
+			if (initialData.endTime) {
+				setWorkoutStatus('completed');
+			} else if (initialData.startTime) {
+				setWorkoutStatus('in_progress');
+			}
 		}
 	}, [initialData]);
 
@@ -241,14 +256,24 @@ export default function WorkoutForm({
 		);
 	};
 
+	const handleStartWorkout = () => {
+		setFormData({
+			...formData,
+			startTime: new Date().toISOString(),
+		});
+		setWorkoutStatus('in_progress');
+	};
+
 	const handleEndWorkout = () => {
 		setFormData({
 			...formData,
 			endTime: new Date().toISOString(),
 		});
+		setWorkoutStatus('completed');
 	};
 
 	const formatTime = (isoString: string) => {
+		if (!isoString) return null;
 		const date = new Date(isoString);
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 	};
@@ -263,6 +288,23 @@ export default function WorkoutForm({
 			setAlert({ type: 'error', message: 'Please enter a workout name.' });
 			setIsLoading(false);
 			return;
+		}
+
+		if (!isTemplate) {
+			if (!formData.startTime) {
+				setAlert({ type: 'error', message: 'Please start the workout first.' });
+				setIsLoading(false);
+				return;
+			}
+
+			if (!formData.endTime) {
+				setAlert({
+					type: 'error',
+					message: 'Please end the workout before saving.',
+				});
+				setIsLoading(false);
+				return;
+			}
 		}
 
 		if (formData.exercises.length === 0) {
@@ -280,29 +322,9 @@ export default function WorkoutForm({
 				setIsLoading(false);
 				return;
 			}
-			if (
-				exercise.exerciseType === 'Strength' &&
-				(exercise.sets === 0 || exercise.reps === 0)
-			) {
-				setAlert({
-					type: 'error',
-					message: 'Please fill in sets and reps for strength exercises.',
-				});
-				setIsLoading(false);
-				return;
-			}
-			if (exercise.exerciseType === 'Cardio' && exercise.duration === 0) {
-				setAlert({
-					type: 'error',
-					message: 'Please fill in duration for cardio exercises.',
-				});
-				setIsLoading(false);
-				return;
-			}
 		}
 
 		try {
-			// Ensure all number fields are numbers, not strings
 			const submissionData = {
 				...formData,
 				duration: Number(formData.duration),
@@ -310,10 +332,10 @@ export default function WorkoutForm({
 					...ex,
 					sets: Number(ex.sets),
 					reps: Number(ex.reps),
-					weight: Number(ex.weight),
+					weight: Number(ex.weight.toFixed(2)),
 					duration: Number(ex.duration),
-					speed: Number(ex.speed),
-					distance: Number(ex.distance),
+					speed: Number(ex.speed.toFixed(2)),
+					distance: Number(ex.distance.toFixed(2)),
 				})),
 			};
 
@@ -393,20 +415,46 @@ export default function WorkoutForm({
 												/>
 												<div className="flex items-center space-x-2 text-sm">
 													<ClockIcon className="h-4 w-4 text-muted-foreground" />
-													<span>Started: {formatTime(formData.startTime)}</span>
-													{formData.endTime ? (
+													{!isTemplate && (
 														<>
-															<span>Ended: {formatTime(formData.endTime)}</span>
-															<span>Duration: {formData.duration} minutes</span>
+															{workoutStatus === 'not_started' && (
+																<Button
+																	type="button"
+																	onClick={handleStartWorkout}
+																	size="sm"
+																	variant="outline"
+																>
+																	Start Workout
+																</Button>
+															)}
+															{workoutStatus === 'in_progress' && (
+																<>
+																	<span>
+																		Started: {formatTime(formData.startTime)}
+																	</span>
+																	<Button
+																		type="button"
+																		onClick={handleEndWorkout}
+																		size="sm"
+																	>
+																		End Workout
+																	</Button>
+																</>
+															)}
+															{workoutStatus === 'completed' && (
+																<>
+																	<span>
+																		Started: {formatTime(formData.startTime)}
+																	</span>
+																	<span>
+																		Ended: {formatTime(formData.endTime)}
+																	</span>
+																	<span>
+																		Duration: {formData.duration} minutes
+																	</span>
+																</>
+															)}
 														</>
-													) : (
-														<Button
-															type="button"
-															onClick={handleEndWorkout}
-															size="sm"
-														>
-															End Workout
-														</Button>
 													)}
 												</div>
 											</div>
@@ -451,21 +499,35 @@ export default function WorkoutForm({
 								<AccordionTrigger className="hover:no-underline">
 									<div className="flex items-center gap-3 w-full">
 										<GripVertical className="h-5 w-5 text-muted-foreground" />
-										<DumbbellIcon className="h-5 w-5" />
+										{exercise.exerciseType === 'Strength' ? (
+											<DumbbellIcon className="h-5 w-5" />
+										) : exercise.exerciseType === 'Cardio' ? (
+											<BikeIcon className="h-5 w-5" />
+										) : null}
+
 										<span className="font-medium">
 											{exercise.name || 'New Exercise'}
 										</span>
+
+										{/* Display strength-specific details */}
 										{exercise.exerciseType === 'Strength' &&
 											exercise.sets > 0 && (
 												<span className="text-sm text-muted-foreground ml-2">
 													{exercise.sets} x {exercise.reps} @ {exercise.weight}{' '}
 													lbs
+													{exercise.weightType && ` (${exercise.weightType})`}
+													{exercise.equipmentSettings &&
+														` | ${exercise.equipmentSettings}`}
+
 												</span>
 											)}
+
+										{/* Display cardio-specific details */}
 										{exercise.exerciseType === 'Cardio' &&
 											exercise.duration > 0 && (
 												<span className="text-sm text-muted-foreground ml-2">
-													{exercise.duration} minutes
+													{exercise.duration} minutes | {exercise.distance}{' '}
+													miles | Speed: {exercise.speed}
 												</span>
 											)}
 									</div>
@@ -650,6 +712,7 @@ export default function WorkoutForm({
 																		handleExerciseChange(index, 'weight', value)
 																	}
 																	step={5}
+																	allowDecimals={true}
 																/>
 															</div>
 														</div>
@@ -690,6 +753,7 @@ export default function WorkoutForm({
 																		handleExerciseChange(index, 'speed', value)
 																	}
 																	step={0.1}
+																	allowDecimals={true}
 																/>
 															</div>
 
@@ -710,6 +774,7 @@ export default function WorkoutForm({
 																		)
 																	}
 																	step={0.1}
+																	allowDecimals={true}
 																/>
 															</div>
 														</div>
