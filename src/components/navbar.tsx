@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
 	Sheet,
 	SheetContent,
+	SheetDescription,
 	SheetTitle,
 	SheetTrigger,
 } from '@/components/ui/sheet';
@@ -79,7 +80,8 @@ export default function Navbar() {
 
 							{/* Mobile Menu Content */}
 							<SheetContent side="right" className="w-[300px] sm:w-[400px]">
-								<SheetTitle className="mb-2">Workout Tracker</SheetTitle>
+								<SheetTitle>Workout Tracker</SheetTitle>
+								<SheetDescription className='mb-4'>Navigation Menu</SheetDescription>
 								<nav className="flex flex-col space-y-4">
 									{navItems.map((item) => {
 										if (item.authRequired && !isAuthenticated) return null;

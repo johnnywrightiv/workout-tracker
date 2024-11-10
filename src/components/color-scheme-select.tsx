@@ -43,14 +43,14 @@ export function ColorSchemeSelect() {
 					className="flex items-center"
 				>
 					<div className="w-4 h-4 rounded-full bg-blue-500 mr-2" />
-					Blue Theme
+					Blue
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => handleColorSchemeChange('purple')}
 					className="flex items-center"
 				>
 					<div className="w-4 h-4 rounded-full bg-purple-500 mr-2" />
-					Purple Theme
+					Purple
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

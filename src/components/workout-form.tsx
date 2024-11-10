@@ -497,8 +497,9 @@ export default function WorkoutForm({
 						{formData.exercises.map((exercise, index) => (
 							<AccordionItem key={index} value={index.toString()}>
 								<AccordionTrigger className="hover:no-underline">
-									<div className="flex items-center gap-3 w-full">
+									<div className="flex flex-wrap items-center gap-3 w-full">
 										<GripVertical className="h-5 w-5 text-muted-foreground" />
+
 										{exercise.exerciseType === 'Strength' ? (
 											<DumbbellIcon className="h-5 w-5" />
 										) : exercise.exerciseType === 'Cardio' ? (
@@ -512,20 +513,19 @@ export default function WorkoutForm({
 										{/* Display strength-specific details */}
 										{exercise.exerciseType === 'Strength' &&
 											exercise.sets > 0 && (
-												<span className="text-sm text-muted-foreground ml-2">
+												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
 													{exercise.sets} x {exercise.reps} @ {exercise.weight}{' '}
 													lbs
 													{exercise.weightType && ` (${exercise.weightType})`}
 													{exercise.equipmentSettings &&
 														` | ${exercise.equipmentSettings}`}
-
 												</span>
 											)}
 
 										{/* Display cardio-specific details */}
 										{exercise.exerciseType === 'Cardio' &&
 											exercise.duration > 0 && (
-												<span className="text-sm text-muted-foreground ml-2">
+												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
 													{exercise.duration} minutes | {exercise.distance}{' '}
 													miles | Speed: {exercise.speed}
 												</span>
@@ -670,7 +670,64 @@ export default function WorkoutForm({
 																}
 															/>
 														</div>
-														<div className="grid grid-cols-3 gap-4">
+													</>
+												)}
+
+												{/* Responsive 3 Input Version */}
+												{/* {exercise.exerciseType === 'Cardio' ? (
+													<div className="flex justify-center">
+														<div className="grid grid-cols-1  sm:grid-cols-2 lg:grid-cols-3 gap-4">
+															<div className="space-y-2">
+																<label
+																	htmlFor={`duration-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Duration (minutes)
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.duration}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'duration', value)
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<label
+																	htmlFor={`speed-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Speed
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.speed}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'speed', value)
+																	}
+																	step={0.1}
+																	allowDecimals={true}
+																/>
+															</div>
+															<div className="space-y-2">
+																<label
+																	htmlFor={`distance-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Distance
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.distance}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'distance', value)
+																	}
+																	step={0.1}
+																	allowDecimals={true}
+																/>
+															</div>
+														</div>
+													</div>
+												) : (
+													<div className="flex justify-center">
+														<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 															<div className="space-y-2">
 																<label
 																	htmlFor={`sets-${index}`}
@@ -716,69 +773,106 @@ export default function WorkoutForm({
 																/>
 															</div>
 														</div>
-													</>
-												)}
-												{exercise.exerciseType === 'Cardio' && (
-													<>
-														<div className="flex space-x-4">
-															<div className="space-y-2 flex-1">
-																<label
-																	htmlFor={`duration-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Duration (minutes)
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.duration}
-																	onChange={(value) =>
-																		handleExerciseChange(
-																			index,
-																			'duration',
-																			value
-																		)
-																	}
-																/>
-															</div>
+													</div>		
+												)} */}
 
-															<div className="space-y-2 flex-1">
-																<label
-																	htmlFor={`speed-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Speed
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.speed}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'speed', value)
-																	}
-																	step={0.1}
-																	allowDecimals={true}
-																/>
-															</div>
-
-															<div className="space-y-2 flex-1">
-																<label
-																	htmlFor={`distance-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Distance
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.distance}
-																	onChange={(value) =>
-																		handleExerciseChange(
-																			index,
-																			'distance',
-																			value
-																		)
-																	}
-																	step={0.1}
-																	allowDecimals={true}
-																/>
-															</div>
+												{/* Single Row 3 Input Version */}
+												{exercise.exerciseType === 'Cardio' ? (
+													<div className="grid grid-cols-3 gap-2 min-w-0">
+														<div className="space-y-2 min-w-0">
+															<label
+																htmlFor={`duration-${index}`}
+																className="text-sm font-medium truncate"
+															>
+																Duration (mins)
+															</label>
+															<IncrementDecrementButton
+																value={exercise.duration}
+																onChange={(value) =>
+																	handleExerciseChange(index, 'duration', value)
+																}
+															/>
 														</div>
-													</>
+														<div className="space-y-2 min-w-0">
+															<label
+																htmlFor={`speed-${index}`}
+																className="text-sm font-medium truncate"
+															>
+																Speed
+															</label>
+															<IncrementDecrementButton
+																value={exercise.speed}
+																onChange={(value) =>
+																	handleExerciseChange(index, 'speed', value)
+																}
+																step={0.1}
+																allowDecimals={true}
+															/>
+														</div>
+														<div className="space-y-2 min-w-0">
+															<label
+																htmlFor={`distance-${index}`}
+																className="text-sm font-medium truncate"
+															>
+																Distance
+															</label>
+															<IncrementDecrementButton
+																value={exercise.distance}
+																onChange={(value) =>
+																	handleExerciseChange(index, 'distance', value)
+																}
+																step={0.1}
+																allowDecimals={true}
+															/>
+														</div>
+													</div>
+												) : (
+													<div className="grid grid-cols-3 gap-2 min-w-0">
+														<div className="space-y-2 min-w-0">
+															<label
+																htmlFor={`sets-${index}`}
+																className="text-sm font-medium truncate"
+															>
+																Sets
+															</label>
+															<IncrementDecrementButton
+																value={exercise.sets}
+																onChange={(value) =>
+																	handleExerciseChange(index, 'sets', value)
+																}
+															/>
+														</div>
+														<div className="space-y-2 min-w-0">
+															<label
+																htmlFor={`reps-${index}`}
+																className="text-sm font-medium truncate"
+															>
+																Reps
+															</label>
+															<IncrementDecrementButton
+																value={exercise.reps}
+																onChange={(value) =>
+																	handleExerciseChange(index, 'reps', value)
+																}
+															/>
+														</div>
+														<div className="space-y-2 min-w-0">
+															<label
+																htmlFor={`weight-${index}`}
+																className="text-sm font-medium truncate"
+															>
+																Weight (lbs)
+															</label>
+															<IncrementDecrementButton
+																value={exercise.weight}
+																onChange={(value) =>
+																	handleExerciseChange(index, 'weight', value)
+																}
+																step={5}
+																allowDecimals={true}
+															/>
+														</div>
+													</div>
 												)}
 
 												<div className="space-y-2">

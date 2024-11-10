@@ -31,6 +31,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 	SheetFooter,
+	SheetDescription,
 } from '@/components/ui/sheet';
 import {
 	Select,
@@ -234,6 +235,7 @@ export default function Component() {
 								<SheetHeader>
 									<SheetTitle>Filter Workouts</SheetTitle>
 								</SheetHeader>
+								<SheetDescription>Configure options to filter your workouts </SheetDescription>
 								<div className="py-4 space-y-6">
 									<div className="space-y-4">
 										<Label>Date Range</Label>
@@ -513,8 +515,8 @@ export default function Component() {
 																) : (
 																	// Cardio Exercise Display
 																	<span>
-																		: Time: {exercise.duration} minute(s){' | '}
-																			Distance: {exercise.distance}{' '}mile(s) |
+																			{' '}{exercise.duration} mins.{' | '}
+																			{exercise.distance}{' '}miles |
 																			Speed: {exercise.speed}
 																			
 																	</span>
