@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,13 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Loader2, DumbbellIcon, GripVertical, InfoIcon } from 'lucide-react';
+import {
+	Loader2,
+	DumbbellIcon,
+	GripVertical,
+	InfoIcon,
+	ClockIcon,
+} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -35,6 +41,17 @@ const MUSCLE_GROUPS = [
 	'Calves',
 	'Misc',
 ] as const;
+const WEIGHT_TYPES = [
+	'Dumbbell',
+	'Barbell',
+	'Kettlebell',
+	'Cable',
+	'Machine',
+	'Band',
+	'Bodyweight',
+	'Misc',
+] as const;
+const EXERCISE_TYPES = ['Strength', 'Cardio'] as const;
 
 interface Exercise {
 	name: string;
@@ -43,10 +60,18 @@ interface Exercise {
 	weight: number;
 	notes: string;
 	muscleGroup: string;
+	weightType: string;
+	equipmentSettings: string;
+	duration: number;
+	exerciseType: string;
+	speed: number;
+	distance: number;
 }
 
 interface FormData {
 	name: string;
+	startTime: string;
+	endTime: string;
 	duration: number;
 	notes: string;
 	exercises: Exercise[];
@@ -88,7 +113,7 @@ const IncrementDecrementButton = ({
 				const newValue =
 					e.target.value === ''
 						? min
-						: Math.max(min, parseFloat(e.target.value, 10));
+						: Math.max(min, parseFloat(e.target.value));
 				onChange(isNaN(newValue) ? min : newValue);
 			}}
 			className="flex w-16 h-8 text-center mx-1"
@@ -115,10 +140,25 @@ export default function WorkoutForm({
 	const [formData, setFormData] = useState<FormData>(
 		initialData || {
 			name: '',
+			startTime: new Date().toISOString(),
+			endTime: '',
 			duration: 0,
 			notes: '',
 			exercises: [
-				{ name: '', sets: 0, reps: 0, weight: 0, notes: '', muscleGroup: '' },
+				{
+					name: '',
+					sets: 0,
+					reps: 0,
+					weight: 0,
+					notes: '',
+					muscleGroup: '',
+					weightType: '',
+					equipmentSettings: '',
+					duration: 0,
+					exerciseType: '',
+					speed: 0,
+					distance: 0,
+				},
 			],
 		}
 	);
@@ -132,6 +172,29 @@ export default function WorkoutForm({
 		message: string;
 	} | null>(null);
 	const router = useRouter();
+
+	useEffect(() => {
+		if (!initialData) {
+			setFormData((prevData) => ({
+				...prevData,
+				startTime: new Date().toISOString(),
+			}));
+		}
+	}, [initialData]);
+
+	useEffect(() => {
+		if (formData.startTime && formData.endTime) {
+			const start = new Date(formData.startTime);
+			const end = new Date(formData.endTime);
+			const durationInMinutes = Math.round(
+				(end.getTime() - start.getTime()) / 60000
+			);
+			setFormData((prevData) => ({
+				...prevData,
+				duration: durationInMinutes,
+			}));
+		}
+	}, [formData.startTime, formData.endTime]);
 
 	const handleExerciseChange = (
 		index: number,
@@ -149,7 +212,20 @@ export default function WorkoutForm({
 			...formData,
 			exercises: [
 				...formData.exercises,
-				{ name: '', sets: 0, reps: 0, weight: 0, notes: '', muscleGroup: '' },
+				{
+					name: '',
+					sets: 0,
+					reps: 0,
+					weight: 0,
+					notes: '',
+					muscleGroup: '',
+					weightType: '',
+					equipmentSettings: '',
+					duration: 0,
+					exerciseType: '',
+					speed: 0,
+					distance: 0,
+				},
 			],
 		});
 		setExpandedExercises([...expandedExercises, newIndex.toString()]);
@@ -163,6 +239,18 @@ export default function WorkoutForm({
 		setExpandedExercises(
 			expandedExercises.filter((i) => i !== index.toString())
 		);
+	};
+
+	const handleEndWorkout = () => {
+		setFormData({
+			...formData,
+			endTime: new Date().toISOString(),
+		});
+	};
+
+	const formatTime = (isoString: string) => {
+		const date = new Date(isoString);
+		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -184,11 +272,29 @@ export default function WorkoutForm({
 		}
 
 		for (const exercise of formData.exercises) {
-			if (!exercise.name.trim() || exercise.sets === 0 || exercise.reps === 0) {
+			if (!exercise.name.trim() || !exercise.exerciseType) {
 				setAlert({
 					type: 'error',
-					message:
-						'Please fill in all required exercise fields (name, sets, reps).',
+					message: 'Please fill in all required exercise fields (name, type).',
+				});
+				setIsLoading(false);
+				return;
+			}
+			if (
+				exercise.exerciseType === 'Strength' &&
+				(exercise.sets === 0 || exercise.reps === 0)
+			) {
+				setAlert({
+					type: 'error',
+					message: 'Please fill in sets and reps for strength exercises.',
+				});
+				setIsLoading(false);
+				return;
+			}
+			if (exercise.exerciseType === 'Cardio' && exercise.duration === 0) {
+				setAlert({
+					type: 'error',
+					message: 'Please fill in duration for cardio exercises.',
 				});
 				setIsLoading(false);
 				return;
@@ -205,6 +311,9 @@ export default function WorkoutForm({
 					sets: Number(ex.sets),
 					reps: Number(ex.reps),
 					weight: Number(ex.weight),
+					duration: Number(ex.duration),
+					speed: Number(ex.speed),
+					distance: Number(ex.distance),
 				})),
 			};
 
@@ -258,7 +367,7 @@ export default function WorkoutForm({
 								<span className="font-medium">Details</span>
 								{formData.name && (
 									<span className="text-sm text-muted-foreground ml-2">
-										{formData.name} • {formData.duration} min
+										{formData.name}
 									</span>
 								)}
 							</div>
@@ -267,11 +376,11 @@ export default function WorkoutForm({
 							<Card>
 								<CardContent className="pt-6">
 									<div className="grid gap-4">
-										<div className="grid sm:grid-cols-2 gap-4">
-											<div className="space-y-2">
-												<label htmlFor="name" className="text-sm font-medium">
-													Name
-												</label>
+										<div className="space-y-2">
+											<label htmlFor="name" className="text-sm font-medium">
+												Name
+											</label>
+											<div className="flex items-center space-x-4">
 												<Input
 													id="name"
 													placeholder="e.g. Leg Day"
@@ -280,32 +389,36 @@ export default function WorkoutForm({
 														setFormData({ ...formData, name: e.target.value })
 													}
 													required
+													className="flex-1"
 												/>
-											</div>
-											<div className="space-y-2">
-												<label
-													htmlFor="duration"
-													className="text-sm font-medium"
-												>
-													Duration (min)
-												</label>
-												<IncrementDecrementButton
-													value={formData.duration}
-													onChange={(value) =>
-														setFormData({ ...formData, duration: value })
-													}
-													min={0}
-													step={5}
-												/>
+												<div className="flex items-center space-x-2 text-sm">
+													<ClockIcon className="h-4 w-4 text-muted-foreground" />
+													<span>Started: {formatTime(formData.startTime)}</span>
+													{formData.endTime ? (
+														<>
+															<span>Ended: {formatTime(formData.endTime)}</span>
+															<span>Duration: {formData.duration} minutes</span>
+														</>
+													) : (
+														<Button
+															type="button"
+															onClick={handleEndWorkout}
+															size="sm"
+														>
+															End Workout
+														</Button>
+													)}
+												</div>
 											</div>
 										</div>
+
 										<div className="space-y-2">
 											<label htmlFor="notes" className="text-sm font-medium">
 												Notes
 											</label>
 											<Textarea
 												id="notes"
-												placeholder="The only bad workout is the one that didn't happen!"
+												placeholder="Any additional notes about the workout"
 												value={formData.notes}
 												onChange={(e) =>
 													setFormData({ ...formData, notes: e.target.value })
@@ -342,11 +455,19 @@ export default function WorkoutForm({
 										<span className="font-medium">
 											{exercise.name || 'New Exercise'}
 										</span>
-										{exercise.sets > 0 && (
-											<span className="text-sm text-muted-foreground ml-2">
-												{exercise.sets} x {exercise.reps} @ {exercise.weight} lbs
-											</span>
-										)}
+										{exercise.exerciseType === 'Strength' &&
+											exercise.sets > 0 && (
+												<span className="text-sm text-muted-foreground ml-2">
+													{exercise.sets} x {exercise.reps} @ {exercise.weight}{' '}
+													lbs
+												</span>
+											)}
+										{exercise.exerciseType === 'Cardio' &&
+											exercise.duration > 0 && (
+												<span className="text-sm text-muted-foreground ml-2">
+													{exercise.duration} minutes
+												</span>
+											)}
 									</div>
 								</AccordionTrigger>
 								<AccordionContent className="pt-4">
@@ -377,85 +498,224 @@ export default function WorkoutForm({
 													</div>
 													<div className="space-y-2">
 														<label
-															htmlFor={`muscleGroup-${index}`}
+															htmlFor={`exerciseType-${index}`}
 															className="text-sm font-medium"
 														>
-															Muscle Group
+															Exercise Type
 														</label>
 														<Select
-															value={exercise.muscleGroup}
+															value={exercise.exerciseType}
 															onValueChange={(value) =>
 																handleExerciseChange(
 																	index,
-																	'muscleGroup',
+																	'exerciseType',
 																	value
 																)
 															}
 														>
 															<SelectTrigger>
-																<SelectValue
-																	placeholder={
-																		<span className="text-muted-foreground">
-																			Select muscle group
-																		</span>
-																	}
-																/>
+																<SelectValue placeholder="Select exercise type" />
 															</SelectTrigger>
 															<SelectContent>
-																{MUSCLE_GROUPS.map((group) => (
-																	<SelectItem key={group} value={group}>
-																		{group}
+																{EXERCISE_TYPES.map((type) => (
+																	<SelectItem key={type} value={type}>
+																		{type}
 																	</SelectItem>
 																))}
 															</SelectContent>
 														</Select>
 													</div>
 												</div>
-												<div className="grid grid-cols-3 gap-4">
-													<div className="space-y-2">
-														<label
-															htmlFor={`sets-${index}`}
-															className="text-sm font-medium"
-														>
-															Sets
-														</label>
-														<IncrementDecrementButton
-															value={exercise.sets}
-															onChange={(value) =>
-																handleExerciseChange(index, 'sets', value)
-															}
-														/>
-													</div>
-													<div className="space-y-2">
-														<label
-															htmlFor={`reps-${index}`}
-															className="text-sm font-medium"
-														>
-															Reps
-														</label>
-														<IncrementDecrementButton
-															value={exercise.reps}
-															onChange={(value) =>
-																handleExerciseChange(index, 'reps', value)
-															}
-														/>
-													</div>
-													<div className="space-y-2">
-														<label
-															htmlFor={`weight-${index}`}
-															className="text-sm font-medium"
-														>
-															Weight (lbs)
-														</label>
-														<IncrementDecrementButton
-															value={exercise.weight}
-															onChange={(value) =>
-																handleExerciseChange(index, 'weight', value)
-															}
-															step={5}
-														/>
-													</div>
-												</div>
+												{exercise.exerciseType === 'Strength' && (
+													<>
+														<div className="grid sm:grid-cols-2 gap-4">
+															<div className="space-y-2">
+																<label
+																	htmlFor={`muscleGroup-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Muscle Group
+																</label>
+																<Select
+																	value={exercise.muscleGroup}
+																	onValueChange={(value) =>
+																		handleExerciseChange(
+																			index,
+																			'muscleGroup',
+																			value
+																		)
+																	}
+																>
+																	<SelectTrigger>
+																		<SelectValue placeholder="Select muscle group" />
+																	</SelectTrigger>
+																	<SelectContent>
+																		{MUSCLE_GROUPS.map((group) => (
+																			<SelectItem key={group} value={group}>
+																				{group}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+															</div>
+															<div className="space-y-2">
+																<label
+																	htmlFor={`weightType-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Weight Type
+																</label>
+																<Select
+																	value={exercise.weightType}
+																	onValueChange={(value) =>
+																		handleExerciseChange(
+																			index,
+																			'weightType',
+																			value
+																		)
+																	}
+																>
+																	<SelectTrigger>
+																		<SelectValue placeholder="Select weight type" />
+																	</SelectTrigger>
+																	<SelectContent>
+																		{WEIGHT_TYPES.map((type) => (
+																			<SelectItem key={type} value={type}>
+																				{type}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+															</div>
+														</div>
+														<div className="space-y-2">
+															<label
+																htmlFor={`equipmentSettings-${index}`}
+																className="text-sm font-medium"
+															>
+																Equipment Settings
+															</label>
+															<Input
+																id={`equipmentSettings-${index}`}
+																placeholder="e.g. Seat height: 5"
+																value={exercise.equipmentSettings}
+																onChange={(e) =>
+																	handleExerciseChange(
+																		index,
+																		'equipmentSettings',
+																		e.target.value
+																	)
+																}
+															/>
+														</div>
+														<div className="grid grid-cols-3 gap-4">
+															<div className="space-y-2">
+																<label
+																	htmlFor={`sets-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Sets
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.sets}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'sets', value)
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<label
+																	htmlFor={`reps-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Reps
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.reps}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'reps', value)
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<label
+																	htmlFor={`weight-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Weight (lbs)
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.weight}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'weight', value)
+																	}
+																	step={5}
+																/>
+															</div>
+														</div>
+													</>
+												)}
+												{exercise.exerciseType === 'Cardio' && (
+													<>
+														<div className="flex space-x-4">
+															<div className="space-y-2 flex-1">
+																<label
+																	htmlFor={`duration-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Duration (minutes)
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.duration}
+																	onChange={(value) =>
+																		handleExerciseChange(
+																			index,
+																			'duration',
+																			value
+																		)
+																	}
+																/>
+															</div>
+
+															<div className="space-y-2 flex-1">
+																<label
+																	htmlFor={`speed-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Speed
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.speed}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'speed', value)
+																	}
+																	step={0.1}
+																/>
+															</div>
+
+															<div className="space-y-2 flex-1">
+																<label
+																	htmlFor={`distance-${index}`}
+																	className="text-sm font-medium"
+																>
+																	Distance
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.distance}
+																	onChange={(value) =>
+																		handleExerciseChange(
+																			index,
+																			'distance',
+																			value
+																		)
+																	}
+																	step={0.1}
+																/>
+															</div>
+														</div>
+													</>
+												)}
+
 												<div className="space-y-2">
 													<label
 														htmlFor={`notes-${index}`}

@@ -38,26 +38,41 @@ export async function PUT(
 	req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-	// Verify the user's authentication
 	const user = verifyAuth(req);
 	if (!user) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
 
-	// Connect to the database
 	await connectToDatabase();
-
-	// Parse the request body for the updated template data
 	const data = await req.json();
 
-	// Find the template by ID and update it
+	// Prepare the update data with all fields
+	const updateData = {
+		name: data.name,
+		duration: data.duration,
+		notes: data.notes,
+		exercises: data.exercises.map((exercise: any) => ({
+			name: exercise.name,
+			sets: exercise.sets,
+			reps: exercise.reps,
+			weight: exercise.weight,
+			notes: exercise.notes,
+			muscleGroup: exercise.muscleGroup,
+			weightType: exercise.weightType,
+			equipmentSettings: exercise.equipmentSettings,
+			duration: exercise.duration,
+			exerciseType: exercise.exerciseType,
+			speed: exercise.speed,
+			distance: exercise.distance,
+		})),
+	};
+
 	const template = await Template.findOneAndUpdate(
 		{ _id: params.id, user_id: user.userId },
-		{ $set: data },
-		{ new: true } // Return the updated document
+		{ $set: updateData },
+		{ new: true }
 	);
 
-	// If template is not found, return 404
 	if (!template) {
 		return NextResponse.json(
 			{ message: 'Template not found' },
@@ -65,10 +80,8 @@ export async function PUT(
 		);
 	}
 
-	// Return the updated template data as JSON
 	return NextResponse.json(template);
 }
-
 
 export async function DELETE(
 	req: NextRequest,

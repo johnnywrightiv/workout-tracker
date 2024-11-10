@@ -1,4 +1,3 @@
-// src / app / api / workouts / [id] / route.ts;
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongoose';
 import Workout from '@/models/workout';
@@ -27,7 +26,7 @@ export async function GET(
 	return NextResponse.json(workout);
 }
 
-// PUT - Update workout
+// UPDATE a workout by ID
 export async function PUT(
 	req: NextRequest,
 	{ params }: { params: { id: string } }
@@ -40,9 +39,32 @@ export async function PUT(
 	await connectToDatabase();
 	const data = await req.json();
 
+	// Prepare the update data with all fields
+	const updateData = {
+		name: data.name,
+		startTime: new Date(data.startTime),
+		endTime: data.endTime ? new Date(data.endTime) : undefined,
+		duration: data.duration,
+		notes: data.notes,
+		exercises: data.exercises.map((exercise: any) => ({
+			name: exercise.name,
+			sets: exercise.sets,
+			reps: exercise.reps,
+			weight: exercise.weight,
+			notes: exercise.notes,
+			muscleGroup: exercise.muscleGroup,
+			weightType: exercise.weightType,
+			equipmentSettings: exercise.equipmentSettings,
+			duration: exercise.duration,
+			exerciseType: exercise.exerciseType,
+			speed: exercise.speed,
+			distance: exercise.distance,
+		})),
+	};
+
 	const workout = await Workout.findOneAndUpdate(
 		{ _id: params.id, user_id: user.userId },
-		{ $set: data },
+		{ $set: updateData },
 		{ new: true }
 	);
 

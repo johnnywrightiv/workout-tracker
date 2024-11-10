@@ -1,12 +1,18 @@
 import mongoose from 'mongoose';
 
 const exerciseSchema = new mongoose.Schema({
-    name: String,
-    sets: Number,
-    reps: Number,
-    weight: Number,
-    notes: String,
-    muscleGroup: String,
+	name: String,
+	sets: Number,
+	reps: Number,
+	weight: Number,
+	notes: String,
+	muscleGroup: String,
+	weightType: String,
+	equipmentSettings: String,
+	duration: Number,
+	exerciseType: String,
+	speed: Number,
+	distance: Number,
 });
 
 const workoutSchema = new mongoose.Schema({
@@ -23,6 +29,11 @@ const workoutSchema = new mongoose.Schema({
 		type: Date,
 		required: true,
 	},
+	startTime: {
+		type: Date,
+		required: true,
+	},
+	endTime: Date,
 	duration: {
 		type: Number,
 		required: true,
@@ -31,5 +42,6 @@ const workoutSchema = new mongoose.Schema({
 	exercises: [exerciseSchema],
 });
 
-const Workout = mongoose.models.Workout || mongoose.model('Workout', workoutSchema);
+const Workout =
+	mongoose.models.Workout || mongoose.model('Workout', workoutSchema);
 export default Workout;
