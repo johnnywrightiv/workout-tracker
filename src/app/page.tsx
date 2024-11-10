@@ -86,6 +86,15 @@ export default function Component() {
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const [filters, setFilters] = useState({
+		exerciseTypes: new Set<string>(),
+		muscleGroups: new Set<string>(),
+		weightTypes: new Set<string>(),
+		dateRange: {
+			from: undefined as Date | undefined,
+			to: undefined as Date | undefined,
+		},
+	});
 	const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 	const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
 
@@ -146,7 +155,7 @@ export default function Component() {
 		});
 
 		setFilteredWorkouts(filtered);
-	}, [workouts, Filter, sortOrder]);
+	}, [workouts, sortOrder]);
 
 	const handleDelete = async (workoutId: string) => {
 		try {
