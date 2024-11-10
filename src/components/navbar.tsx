@@ -101,8 +101,8 @@ export default function Navbar() {
 									)}
 									{/* Mobile Auth Buttons */}
 									{!isAuthenticated && (
-										<div className="space-y-4">
-											<Button variant="ghost" asChild>
+										<div className=" space-x-2">
+											<Button variant="outline" asChild>
 												<Link
 													href="/signup"
 													className="flex items-center space-x-2"
@@ -135,7 +135,7 @@ export default function Navbar() {
 function AuthButtons() {
 	return (
 		<div className="hidden md:flex md:items-center md:space-x-4">
-			<Button variant="ghost" asChild>
+			<Button variant="outline" asChild>
 				<Link href="/signup" className="flex items-center space-x-2">
 					<UserPlus className="h-4 w-4" />
 					<span>Sign Up</span>

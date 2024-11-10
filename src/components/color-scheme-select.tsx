@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -8,26 +9,31 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-type ColorScheme = 'blue' | 'purple';
+import { selectColorScheme, setColorScheme } from '@/store/theme-slice';
 
 export function ColorSchemeSelect() {
-	const { resolvedTheme: mode } = useTheme();
-	const [colorScheme, setColorScheme] = React.useState<ColorScheme>('blue');
+	const dispatch = useDispatch();
+	const colorScheme = useSelector(selectColorScheme);
+
+	// Set initial color scheme on mount
+	React.useEffect(() => {
+		document.documentElement.classList.add(`theme-${colorScheme}`);
+		return () => {
+			document.documentElement.classList.remove(`theme-${colorScheme}`);
+		};
+	}, [colorScheme]);
 
 	const handleColorSchemeChange = (newScheme: ColorScheme) => {
-		setColorScheme(newScheme);
-		// Remove any existing color scheme classes
-		document.documentElement.classList.remove('theme-blue', 'theme-purple');
-		// Add the new color scheme class
+		dispatch(setColorScheme(newScheme));
+		document.documentElement.classList.remove(`theme-${colorScheme}`);
 		document.documentElement.classList.add(`theme-${newScheme}`);
 	};
 
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button>
-					<Palette className="mr-2 h-4 w-4" />
+				<Button variant="default" className="flex items-center gap-2">
+					<Palette className="h-4 w-4" />
 					<span>Color Scheme</span>
 				</Button>
 			</DropdownMenuTrigger>
@@ -37,14 +43,14 @@ export function ColorSchemeSelect() {
 					className="flex items-center"
 				>
 					<div className="w-4 h-4 rounded-full bg-blue-500 mr-2" />
-					Blue
+					Blue Theme
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => handleColorSchemeChange('purple')}
 					className="flex items-center"
 				>
 					<div className="w-4 h-4 rounded-full bg-purple-500 mr-2" />
-					Purple
+					Purple Theme
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

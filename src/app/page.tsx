@@ -98,7 +98,7 @@ export default function Home() {
 					Please log in or sign up to view and manage your workouts.
 				</p>
 				<div className="space-x-4">
-					<Button variant="ghost" asChild>
+					<Button variant="outline" asChild>
 						<Link href="/signup" className="flex items-center space-x-2">
 							<UserPlus className="h-4 w-4" />
 							<span>Sign Up</span>
