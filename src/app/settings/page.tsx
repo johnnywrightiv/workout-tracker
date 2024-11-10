@@ -1,5 +1,6 @@
 'use client';
 
+import { ColorSchemeSelect } from '@/components/color-scheme-select';
 import LogoutButton from '@/components/logout-button';
 import { ThemeSelect } from '@/components/theme-selector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +23,10 @@ export default function SettingsPage() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						<ThemeSelect />
+						<div>
+							<ThemeSelect />
+						</div>
+						<ColorSchemeSelect />
 					</CardContent>
 				</Card>
 
