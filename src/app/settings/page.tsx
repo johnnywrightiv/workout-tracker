@@ -1,33 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import LogoutButton from '@/components/logout-button';
 import { ThemeSelect } from '@/components/theme-selector';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Settings, Palette } from 'lucide-react';
+import { Settings, Palette, UserPlus, LogIn } from 'lucide-react';
 
 export default function SettingsPage() {
-	const isAuthenticated = useSelector(
-		(state: RootState) => state.auth.isAuthenticated
-	);
-
-	if (!isAuthenticated) {
-		return (
-			<div className="container mx-auto py-16 px-4 text-center">
-				<h2 className="text-3xl font-bold mb-8">Access Your Settings</h2>
-				<p className="text-xl mb-8">
-					Please log in to view and manage your settings.
-				</p>
-				<Button asChild size="lg">
-					<Link href="/login">Log In</Link>
-				</Button>
-			</div>
-		);
-	}
 
 	return (
 		<div className="container mx-auto py-8 px-4 space-y-8">
