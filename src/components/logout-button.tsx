@@ -1,17 +1,32 @@
-'use client'
+'use client';
 
 import { useDispatch } from 'react-redux';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/store/auth-slice';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const LogoutButton = ({ variant = 'dropdown' }) => {
 	const dispatch = useDispatch();
 	const router = useRouter();
-	const handleLogout = () => {
-		dispatch(logout());
-		router.push('/');
+
+	const handleLogout = async () => {
+		try {
+			await axios.post(
+				'/api/auth/logout',
+				{},
+				{
+					withCredentials: true,
+				}
+			);
+
+			dispatch(logout());
+
+			router.push('/');
+		} catch (error) {
+			console.error('Logout failed:', error);
+		}
 	};
 
 	return (
