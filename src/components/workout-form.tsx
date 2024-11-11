@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import {
 	Select,
 	SelectContent,
@@ -29,7 +28,6 @@ import {
 	BikeIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 
@@ -110,7 +108,7 @@ const IncrementDecrementButton = ({
 			variant="outline"
 			size="icon"
 			onClick={() => {
-				const newValue = Number((Math.max(min, value - step)).toFixed(2));
+				const newValue = Number(Math.max(min, value - step).toFixed(2));
 				onChange(newValue);
 			}}
 			disabled={value <= min}
@@ -122,14 +120,17 @@ const IncrementDecrementButton = ({
 			type="number"
 			value={value}
 			onChange={(e) => {
-				const newValue = e.target.value === ''
-					? min
-					: Math.max(min, parseFloat(e.target.value));
-				onChange(allowDecimals ? Number(newValue.toFixed(2)) : Math.floor(newValue));
+				const newValue =
+					e.target.value === ''
+						? min
+						: Math.max(min, parseFloat(e.target.value));
+				onChange(
+					allowDecimals ? Number(newValue.toFixed(2)) : Math.floor(newValue)
+				);
 			}}
 			className="flex w-16 h-8 text-center mx-1"
 			min={min}
-			step={allowDecimals ? "0.01" : "1"}
+			step={allowDecimals ? '0.01' : '1'}
 		/>
 		<Button
 			type="button"
@@ -182,14 +183,11 @@ export default function WorkoutForm({
 	const [expandedSections, setExpandedSections] = useState<string[]>([
 		'details',
 	]);
-	const [alert, setAlert] = useState<{
-		type: 'success' | 'error';
-		message: string;
-	} | null>(null);
 	const [workoutStatus, setWorkoutStatus] = useState<
 		'not_started' | 'in_progress' | 'completed'
 	>('not_started');
 	const router = useRouter();
+	const { toast } = useToast();
 
 	useEffect(() => {
 		if (initialData) {
@@ -228,7 +226,7 @@ export default function WorkoutForm({
 		return to === 'km' ? distance * 1.60934 : distance / 1.60934;
 	};
 
-  const handleExerciseChange = (
+	const handleExerciseChange = (
 		index: number,
 		field: keyof Exercise,
 		value: string | number
@@ -308,26 +306,34 @@ export default function WorkoutForm({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
-		setAlert(null);
 
 		// Validate form
 		if (!formData.name.trim()) {
-			setAlert({ type: 'error', message: 'Please enter a workout name.' });
+			toast({
+				variant: 'destructive',
+				title: 'Validation Error',
+				description: 'Please enter a workout name.',
+			});
 			setIsLoading(false);
 			return;
 		}
 
 		if (!isTemplate) {
 			if (!formData.startTime) {
-				setAlert({ type: 'error', message: 'Please start the workout first.' });
+				toast({
+					variant: 'destructive',
+					title: 'Validation Error',
+					description: 'Please start the workout first.',
+				});
 				setIsLoading(false);
 				return;
 			}
 
 			if (!formData.endTime) {
-				setAlert({
-					type: 'error',
-					message: 'Please end the workout before saving.',
+				toast({
+					variant: 'destructive',
+					title: 'Validation Error',
+					description: 'Please end the workout before saving.',
 				});
 				setIsLoading(false);
 				return;
@@ -335,16 +341,22 @@ export default function WorkoutForm({
 		}
 
 		if (formData.exercises.length === 0) {
-			setAlert({ type: 'error', message: 'Please add at least one exercise.' });
+			toast({
+				variant: 'destructive',
+				title: 'Validation Error',
+				description: 'Please add at least one exercise.',
+			});
 			setIsLoading(false);
 			return;
 		}
 
 		for (const exercise of formData.exercises) {
 			if (!exercise.name.trim() || !exercise.exerciseType) {
-				setAlert({
-					type: 'error',
-					message: 'Please fill in all required exercise fields (name, type).',
+				toast({
+					variant: 'destructive',
+					title: 'Validation Error',
+					description:
+						'Please fill in all required exercise fields (name, type).',
 				});
 				setIsLoading(false);
 				return;
@@ -367,20 +379,17 @@ export default function WorkoutForm({
 			};
 
 			await onSubmit(submissionData);
-			setAlert({
-				type: 'success',
-				message: `Your ${
-					isTemplate ? 'template' : 'workout'
-				} has been successfully ${id ? 'updated' : 'added'}.`,
+			toast({
+				title: 'Success',
+				description: `Your ${isTemplate ? 'template' : 'workout'} has been successfully ${id ? 'updated' : 'saved'}.`,
 			});
 			router.push(isTemplate ? '/templates' : '/');
 		} catch (error) {
 			console.error('Submission error:', error);
-			setAlert({
-				type: 'error',
-				message: `Failed to ${id ? 'update' : 'create'} ${
-					isTemplate ? 'template' : 'workout'
-				}. Please try again.`,
+			toast({
+				variant: 'destructive',
+				title: 'Error',
+				description: `Failed to ${id ? 'update' : 'create'} ${isTemplate ? 'template' : 'workout'}. Please try again.`,
 			});
 		} finally {
 			setIsLoading(false);
@@ -393,15 +402,6 @@ export default function WorkoutForm({
 				<h1 className="text-2xl font-bold">
 					{id ? 'Edit' : 'Create'} {isTemplate ? 'Template' : 'Workout'}
 				</h1>
-
-				{alert && (
-					<Alert variant={alert.type === 'error' ? 'destructive' : 'default'}>
-						<AlertTitle>
-							{alert.type === 'error' ? 'Error' : 'Success'}
-						</AlertTitle>
-						<AlertDescription>{alert.message}</AlertDescription>
-					</Alert>
-				)}
 
 				<Accordion
 					type="multiple"
@@ -427,7 +427,7 @@ export default function WorkoutForm({
 									<div className="grid gap-4">
 										<div className="space-y-2">
 											<label htmlFor="name" className="text-sm font-medium">
-												Name
+												Workout Name
 											</label>
 											<div className="flex items-center space-x-4">
 												<Input
@@ -437,7 +437,6 @@ export default function WorkoutForm({
 													onChange={(e) =>
 														setFormData({ ...formData, name: e.target.value })
 													}
-													required
 													className="flex-1"
 												/>
 												<div className="flex items-center space-x-2 text-sm">
@@ -599,7 +598,6 @@ export default function WorkoutForm({
 																	e.target.value
 																)
 															}
-															required
 														/>
 													</div>
 													<div className="space-y-2">

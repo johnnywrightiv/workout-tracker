@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ColorSchemeProvider } from '@/components/color-scheme-provider';
 import AuthProvider from '@/components/auth-provider';
 import { ClientWrapper } from '@/components/client-wrapper';
+import { Toaster } from '@/components/ui/toaster';
 
 import Navbar from '@/components/navbar';
 
@@ -47,6 +48,7 @@ export default function RootLayout({
 							<ColorSchemeProvider>
 								<ClientWrapper>
 									<Navbar />
+									<Toaster />
 									<div>
 										<div className="hidden lg:block">{/* <Sidebar /> */}</div>
 										<main>{children}</main>
