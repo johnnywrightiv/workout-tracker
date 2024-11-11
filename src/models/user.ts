@@ -5,9 +5,12 @@ const userSchema = new mongoose.Schema({
 	email: { type: String, required: true, unique: true },
 	password_hash: { type: String, required: true },
 	name: { type: String, required: false },
+	preferences: {
+		colorScheme: { type: String, default: 'blue' },
+		measurementSystem: { type: String, default: 'metric' },
+	},
 });
 
-// Compare password method
 userSchema.methods.comparePassword = async function (password: string) {
 	return bcrypt.compare(password, this.password_hash);
 };

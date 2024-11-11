@@ -17,7 +17,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { RootState } from '@/store/store'; // Make sure to import RootState type
+import { RootState } from '@/store/store';
 
 const Login = () => {
 	const [email, setEmail] = useState('');
@@ -30,7 +30,6 @@ const Login = () => {
 		(state: RootState) => state.auth.isAuthenticated
 	);
 
-	// Watch for auth state changes and navigate accordingly
 	useEffect(() => {
 		if (isAuthenticated && isLoggingIn) {
 			router.push('/');
@@ -59,9 +58,9 @@ const Login = () => {
 						userId: data.userId,
 						email: data.email,
 						name: data.name,
+						preferences: data.preferences,
 					})
 				);
-				// Navigation will happen via the useEffect
 			} else {
 				setError(data.message || 'Login failed');
 				setIsLoggingIn(false);

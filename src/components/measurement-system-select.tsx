@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Palette } from 'lucide-react';
+import { Ruler } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,31 +13,31 @@ import {
 import { updateUserPreferences } from '@/store/auth-slice';
 import { RootState } from '@/store/store';
 
-export function ColorSchemeSelect() {
+export function MeasurementSystemSelect() {
 	const dispatch = useDispatch();
-	const colorScheme = useSelector(
-		(state: RootState) => state.auth.user?.preferences?.colorScheme || 'blue'
+	const measurementSystem = useSelector(
+		(state: RootState) =>
+			state.auth.user?.preferences?.measurementSystem || 'metric'
 	);
 
-	const handleColorSchemeChange = async (newScheme: string) => {
+	const handleMeasurementSystemChange = async (newSystem: string) => {
 		try {
-			localStorage.setItem('colorScheme', newScheme);
-			dispatch(updateUserPreferences({ colorScheme: newScheme }));
-
 			const response = await fetch('/api/user/preferences', {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ colorScheme: newScheme }),
+				body: JSON.stringify({ measurementSystem: newSystem }),
 			});
 
-			if (!response.ok) {
-				console.error('Failed to update color scheme on server');
-				// Optionally, revert the local change if the server update fails
+			if (response.ok) {
+				const data = await response.json();
+				dispatch(updateUserPreferences(data.preferences));
+			} else {
+				console.error('Failed to update measurement system');
 			}
 		} catch (error) {
-			console.error('Error updating color scheme:', error);
+			console.error('Error updating measurement system:', error);
 		}
 	};
 
@@ -45,24 +45,22 @@ export function ColorSchemeSelect() {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="default" className="flex items-center gap-2">
-					<Palette className="h-4 w-4" />
-					<span>Color Scheme</span>
+					<Ruler className="h-4 w-4" />
+					<span>Measurement System</span>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				<DropdownMenuItem
-					onClick={() => handleColorSchemeChange('blue')}
+					onClick={() => handleMeasurementSystemChange('imperial')}
 					className="flex items-center"
 				>
-					<div className="w-4 h-4 rounded-full bg-blue-500 mr-2" />
-					Blue
+					Imperial
 				</DropdownMenuItem>
 				<DropdownMenuItem
-					onClick={() => handleColorSchemeChange('purple')}
+					onClick={() => handleMeasurementSystemChange('metric')}
 					className="flex items-center"
 				>
-					<div className="w-4 h-4 rounded-full bg-purple-500 mr-2" />
-					Purple
+					Metric
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

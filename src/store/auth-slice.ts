@@ -7,6 +7,10 @@ interface AuthState {
 		userId: string;
 		email: string;
 		name: string;
+		preferences: {
+			colorScheme: string;
+			measurementSystem: string;
+		};
 	} | null;
 }
 
@@ -19,18 +23,21 @@ const authSlice = createSlice({
 	name: 'auth',
 	initialState,
 	reducers: {
-		// Action to log the user in
-		login: (
-			state,
-			action: PayloadAction<{ userId: string; email: string; name: string }>
-		) => {
+		login: (state, action: PayloadAction<AuthState['user']>) => {
 			state.isAuthenticated = true;
 			state.user = action.payload;
 		},
-		// Action to log the user out
 		logout: (state) => {
 			state.isAuthenticated = false;
 			state.user = null;
+		},
+		updateUserPreferences: (
+			state,
+			action: PayloadAction<AuthState['user']['preferences']>
+		) => {
+			if (state.user) {
+				state.user.preferences = action.payload;
+			}
 		},
 		// Optional: Action to set user details (e.g., after re-authentication)
 		setUserDetails: (
@@ -56,6 +63,7 @@ const authSlice = createSlice({
 export const {
 	login,
 	logout,
+	updateUserPreferences,
 	setUserDetails,
 	setAuthenticated,
 	setUnauthenticated,

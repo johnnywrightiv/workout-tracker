@@ -2,6 +2,7 @@
 
 import { ColorSchemeSelect } from '@/components/color-scheme-select';
 import LogoutButton from '@/components/logout-button';
+import { MeasurementSystemSelect } from '@/components/measurement-system-select';
 import { ThemeSelect } from '@/components/theme-selector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, Palette } from 'lucide-react';
@@ -26,6 +27,7 @@ export default function SettingsPage() {
 							<ThemeSelect />
 						</div>
 						<ColorSchemeSelect />
+						<MeasurementSystemSelect />
 					</CardContent>
 				</Card>
 

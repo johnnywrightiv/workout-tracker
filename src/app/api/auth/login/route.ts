@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 		await connectToDatabase();
 
 		const { email, password } = await req.json();
-		console.log('Login attempt for email:', email); // Debug log
+		console.log('Login attempt for email:', email);
 
 		if (!email || !password) {
 			return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const existingUser = await User.findOne({ email });
-		console.log('User found:', existingUser ? 'Yes' : 'No'); // Debug log
+		console.log('User found:', existingUser ? 'Yes' : 'No');
 
 		if (!existingUser) {
 			return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 			password,
 			existingUser.password_hash
 		);
-		console.log('Password valid:', isPasswordValid); // Debug log
+		console.log('Password valid:', isPasswordValid);
 
 		if (!isPasswordValid) {
 			return NextResponse.json(
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
 				userId: existingUser._id,
 				email: existingUser.email,
 				name: existingUser.name,
+				preferences: existingUser.preferences,
 			},
 			{ status: 200 }
 		);

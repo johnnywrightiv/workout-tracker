@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 
 export const MUSCLE_GROUPS = [
 	'Chest',
@@ -60,17 +62,17 @@ export const EXERCISE_TYPES = ['Strength', 'Cardio'] as const;
 
 interface Exercise {
 	name: string;
-	sets: number;
-	reps: number;
-	weight: number;
+	sets: number | undefined;
+	reps: number | undefined;
+	weight: number | undefined;
 	notes: string;
 	muscleGroup: string;
 	weightType: string;
 	equipmentSettings: string;
-	duration: number;
+	duration: number | undefined;
 	exerciseType: string;
-	speed: number;
-	distance: number;
+	speed: number | undefined;
+	distance: number | undefined;
 }
 
 interface FormData {
@@ -213,12 +215,35 @@ export default function WorkoutForm({
 		}
 	}, [formData.startTime, formData.endTime]);
 
-	const handleExerciseChange = (
+	const measurementSystem = useSelector(
+		(state: RootState) =>
+			state.auth.user?.preferences?.measurementSystem || 'imperial'
+	);
+
+	const convertWeight = (weight: number, to: 'kg' | 'lbs') => {
+		return to === 'kg' ? weight * 0.45359237 : weight / 0.45359237;
+	};
+
+	const convertDistance = (distance: number, to: 'km' | 'miles') => {
+		return to === 'km' ? distance * 1.60934 : distance / 1.60934;
+	};
+
+  const handleExerciseChange = (
 		index: number,
 		field: keyof Exercise,
 		value: string | number
 	) => {
 		const updatedExercises = [...formData.exercises];
+		if (field === 'weight' && typeof value === 'number') {
+			value =
+				measurementSystem === 'metric' ? convertWeight(value, 'lbs') : value;
+		}
+		if (field === 'distance' && typeof value === 'number') {
+			value =
+				measurementSystem === 'metric'
+					? convertDistance(value, 'miles')
+					: value;
+		}
 		updatedExercises[index] = { ...updatedExercises[index], [field]: value };
 		setFormData({ ...formData, exercises: updatedExercises });
 	};
@@ -231,17 +256,17 @@ export default function WorkoutForm({
 				...formData.exercises,
 				{
 					name: '',
-					sets: 0,
-					reps: 0,
-					weight: 0,
+					sets: undefined,
+					reps: undefined,
+					weight: undefined,
 					notes: '',
 					muscleGroup: '',
 					weightType: '',
 					equipmentSettings: '',
-					duration: 0,
+					duration: undefined,
 					exerciseType: '',
-					speed: 0,
-					distance: 0,
+					speed: undefined,
+					distance: undefined,
 				},
 			],
 		});
@@ -516,8 +541,11 @@ export default function WorkoutForm({
 										{exercise.exerciseType === 'Strength' &&
 											exercise.sets > 0 && (
 												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
-													{exercise.sets} x {exercise.reps} @ {exercise.weight}{' '}
-													lbs
+													{exercise.sets} x {exercise.reps} @{' '}
+													{measurementSystem === 'metric'
+														? (exercise.weight * 0.45359237).toFixed(1)
+														: exercise.weight}{' '}
+													{measurementSystem === 'metric' ? 'kg' : 'lbs'}
 													{exercise.weightType && ` (${exercise.weightType})`}
 													{exercise.equipmentSettings &&
 														` | ${exercise.equipmentSettings}`}
@@ -528,10 +556,24 @@ export default function WorkoutForm({
 										{exercise.exerciseType === 'Cardio' &&
 											exercise.duration > 0 && (
 												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
-													{exercise.duration} minutes | {exercise.distance}{' '}
-													miles | Speed: {exercise.speed}
+													{exercise.duration} minutes |{' '}
+													{measurementSystem === 'metric'
+														? (exercise.distance * 1.60934).toFixed(2)
+														: exercise.distance}{' '}
+													{measurementSystem === 'metric' ? 'km' : 'miles'} |
+													Speed:{' '}
+													{measurementSystem === 'metric'
+														? (exercise.speed * 1.60934).toFixed(1)
+														: exercise.speed}{' '}
+													{measurementSystem === 'metric' ? 'km/h' : 'mph'}
 												</span>
 											)}
+
+										{exercise.notes && (
+											<span className="text-sm text-start text-muted-foreground ml-8 -mt-2">
+												{exercise.notes}
+											</span>
+										)}
 									</div>
 								</AccordionTrigger>
 								<AccordionContent className="pt-4">
@@ -675,110 +717,7 @@ export default function WorkoutForm({
 													</>
 												)}
 
-												{/* Responsive 3 Input Version */}
-												{/* {exercise.exerciseType === 'Cardio' ? (
-													<div className="flex justify-center">
-														<div className="grid grid-cols-1  sm:grid-cols-2 lg:grid-cols-3 gap-4">
-															<div className="space-y-2">
-																<label
-																	htmlFor={`duration-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Duration (minutes)
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.duration}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'duration', value)
-																	}
-																/>
-															</div>
-															<div className="space-y-2">
-																<label
-																	htmlFor={`speed-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Speed
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.speed}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'speed', value)
-																	}
-																	step={0.1}
-																	allowDecimals={true}
-																/>
-															</div>
-															<div className="space-y-2">
-																<label
-																	htmlFor={`distance-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Distance
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.distance}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'distance', value)
-																	}
-																	step={0.1}
-																	allowDecimals={true}
-																/>
-															</div>
-														</div>
-													</div>
-												) : (
-													<div className="flex justify-center">
-														<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-															<div className="space-y-2">
-																<label
-																	htmlFor={`sets-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Sets
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.sets}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'sets', value)
-																	}
-																/>
-															</div>
-															<div className="space-y-2">
-																<label
-																	htmlFor={`reps-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Reps
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.reps}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'reps', value)
-																	}
-																/>
-															</div>
-															<div className="space-y-2">
-																<label
-																	htmlFor={`weight-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Weight (lbs)
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.weight}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'weight', value)
-																	}
-																	step={5}
-																	allowDecimals={true}
-																/>
-															</div>
-														</div>
-													</div>		
-												)} */}
-
-												{/* Single Row 3 Input Version */}
+												{/* Cardio or Strength Input Values */}
 												{exercise.exerciseType === 'Cardio' ? (
 													<div className="grid grid-cols-3 gap-2 min-w-0">
 														<div className="space-y-2 min-w-0">
@@ -800,7 +739,11 @@ export default function WorkoutForm({
 																htmlFor={`speed-${index}`}
 																className="text-sm font-medium truncate"
 															>
-																Speed
+																Speed (
+																{measurementSystem === 'metric'
+																	? 'km/h'
+																	: 'mph'}
+																)
 															</label>
 															<IncrementDecrementButton
 																value={exercise.speed}
@@ -816,10 +759,18 @@ export default function WorkoutForm({
 																htmlFor={`distance-${index}`}
 																className="text-sm font-medium truncate"
 															>
-																Distance
+																Distance (
+																{measurementSystem === 'metric'
+																	? 'km'
+																	: 'miles'}
+																)
 															</label>
 															<IncrementDecrementButton
-																value={exercise.distance}
+																value={
+																	measurementSystem === 'metric'
+																		? convertDistance(exercise.distance, 'km')
+																		: exercise.distance
+																}
 																onChange={(value) =>
 																	handleExerciseChange(index, 'distance', value)
 																}
@@ -828,7 +779,7 @@ export default function WorkoutForm({
 															/>
 														</div>
 													</div>
-												) : (
+												) : exercise.exerciseType === 'Strength' ? (
 													<div className="grid grid-cols-3 gap-2 min-w-0">
 														<div className="space-y-2 min-w-0">
 															<label
@@ -863,18 +814,25 @@ export default function WorkoutForm({
 																htmlFor={`weight-${index}`}
 																className="text-sm font-medium truncate"
 															>
-																Weight (lbs)
+																Weight (
+																{measurementSystem === 'metric' ? 'kg' : 'lbs'})
 															</label>
 															<IncrementDecrementButton
-																value={exercise.weight}
+																value={
+																	measurementSystem === 'metric'
+																		? convertWeight(exercise.weight, 'kg')
+																		: exercise.weight
+																}
 																onChange={(value) =>
 																	handleExerciseChange(index, 'weight', value)
 																}
-																step={5}
+																step={measurementSystem === 'metric' ? 2.5 : 5}
 																allowDecimals={true}
 															/>
 														</div>
 													</div>
+												) : (
+													<div></div>
 												)}
 
 												<div className="space-y-2">
