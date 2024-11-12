@@ -79,7 +79,7 @@ export default function Navbar() {
 							</SheetTrigger>
 
 							{/* Mobile Menu Content */}
-							<SheetContent side="right" className="w-[300px] sm:w-[400px]">
+							<SheetContent side="right" className="w-[300px] sm:w-[400px] animate-slide-in-from-right">
 								<SheetTitle>Workout Tracker</SheetTitle>
 								<SheetDescription className="mb-4">
 									Navigation Menu

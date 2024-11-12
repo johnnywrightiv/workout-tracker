@@ -166,12 +166,50 @@
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	transition: background-color var(--transition-duration) ease,
+	transition:
+		background-color var(--transition-duration) ease,
 		color var(--transition-duration) ease;
 }
 
 * {
-	transition: border-color var(--transition-duration) ease,
+	transition:
+		border-color var(--transition-duration) ease,
 		background-color var(--transition-duration) ease,
 		color var(--transition-duration) ease;
+}
+
+@keyframes slideInFromTop {
+	0% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideInFromRight {
+	0% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+.animate-slide-in-from-top {
+	animation: slideInFromTop 0.5s ease-in-out forwards;
+}
+
+.animate-slide-in-from-right {
+	animation: slideInFromRight 0.3s ease-in-out forwards;
+}
+
+.toast {
+	transition:
+		opacity 0.5s ease,
+		transform 0.5s ease;
 }

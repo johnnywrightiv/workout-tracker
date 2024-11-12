@@ -209,7 +209,7 @@ export default function Home() {
 				<SheetTitle>Filter Workouts</SheetTitle>
 			</SheetHeader>
 			<SheetDescription>
-				Configure options to filter your workouts{' '}
+				Configure options to filter your workout history{' '}
 			</SheetDescription>
 			<div className="py-4 space-y-6">
 				<div className="space-y-4">
@@ -382,7 +382,7 @@ export default function Home() {
 									</Button>
 								</DrawerTrigger>
 								<DrawerContent>
-									<div className="pl-2 mx-auto w-full max-w-sm">
+									<div className="pl-2 mx-auto w-full max-w-sm ">
 										<FilterContent />
 									</div>
 								</DrawerContent>
@@ -395,7 +395,7 @@ export default function Home() {
 										Filter
 									</Button>
 								</SheetTrigger>
-								<SheetContent>
+								<SheetContent className=" animate-slide-in-from-right">
 									<FilterContent />
 								</SheetContent>
 							</Sheet>

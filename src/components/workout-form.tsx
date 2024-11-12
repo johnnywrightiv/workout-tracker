@@ -22,7 +22,6 @@ import {
 import {
 	Loader2,
 	DumbbellIcon,
-	GripVertical,
 	InfoIcon,
 	ClockIcon,
 	BikeIcon,
@@ -179,7 +178,7 @@ export default function WorkoutForm({
 		}
 	);
 	const [isLoading, setIsLoading] = useState(false);
-	const [expandedExercises, setExpandedExercises] = useState<string[]>(['0']);
+	const [expandedExercises, setExpandedExercises] = useState<string[]>(['']);
 	const [expandedSections, setExpandedSections] = useState<string[]>([
 		'details',
 	]);
@@ -439,53 +438,54 @@ export default function WorkoutForm({
 													}
 													className="flex-1"
 												/>
-												<div className="flex items-center space-x-2 text-sm">
-													<ClockIcon className="h-4 w-4 text-muted-foreground" />
-													{!isTemplate && (
-														<>
-															{workoutStatus === 'not_started' && (
+												{!isTemplate && (
+													<div className="flex flex-col items-start space-y-2">
+														{workoutStatus === 'not_started' && (
+															<Button
+																type="button"
+																onClick={handleStartWorkout}
+																size="sm"
+																variant="outline"
+															>
+																Start Workout
+															</Button>
+														)}
+														{workoutStatus === 'in_progress' && (
+															<div className="flex flex-col space-y-2">
 																<Button
 																	type="button"
-																	onClick={handleStartWorkout}
+																	onClick={handleEndWorkout}
 																	size="sm"
-																	variant="outline"
 																>
-																	Start Workout
+																	End Workout
 																</Button>
-															)}
-															{workoutStatus === 'in_progress' && (
-																<>
-																	<span>
-																		Started: {formatTime(formData.startTime)}
-																	</span>
-																	<Button
-																		type="button"
-																		onClick={handleEndWorkout}
-																		size="sm"
-																	>
-																		End Workout
-																	</Button>
-																</>
-															)}
-															{workoutStatus === 'completed' && (
-																<>
-																	<span>
-																		Started: {formatTime(formData.startTime)}
-																	</span>
-																	<span>
-																		Ended: {formatTime(formData.endTime)}
-																	</span>
-																	<span>
-																		Duration: {formData.duration} minutes
-																	</span>
-																</>
-															)}
-														</>
-													)}
-												</div>
+															</div>
+														)}
+													</div>
+												)}
 											</div>
 										</div>
 
+										{workoutStatus === 'in_progress' && (
+											<div className="text-sm flex items-center justify-end space-x-1">
+												<ClockIcon className="h-4 w-4 text-muted-foreground" />
+												<span>Started: {formatTime(formData.startTime)}</span>
+											</div>
+										)}
+										{workoutStatus === 'completed' && (
+											<div className="sm:text-sm text-xs flex items-center justify-evenly">
+												<div className="flex items-center space-x-1">
+													<span>Start: {formatTime(formData.startTime)} - </span>
+													<span>End: {formatTime(formData.endTime)}</span>
+												</div>
+												<div className="flex items-center space-x-1 sm:space-x-2">
+													<ClockIcon className="h-4 w-4 text-muted-foreground" />
+													<span>{formData.duration} minutes</span>
+												</div>
+											</div>
+										)}
+
+										{/* Notes Section */}
 										<div className="space-y-2">
 											<label htmlFor="notes" className="text-sm font-medium">
 												Notes
@@ -507,7 +507,7 @@ export default function WorkoutForm({
 					</AccordionItem>
 				</Accordion>
 
-				<div className="space-y-4">
+				<div className="space-y-4 px-4">
 					<div className="flex items-center justify-between">
 						<h2 className="text-xl font-semibold">Exercises</h2>
 						<Button type="button" onClick={handleAddExercise} size="sm">
@@ -524,8 +524,6 @@ export default function WorkoutForm({
 							<AccordionItem key={index} value={index.toString()}>
 								<AccordionTrigger className="hover:no-underline">
 									<div className="flex flex-wrap items-center gap-3 w-full">
-										<GripVertical className="h-5 w-5 text-muted-foreground" />
-
 										{exercise.exerciseType === 'Strength' ? (
 											<DumbbellIcon className="h-5 w-5" />
 										) : exercise.exerciseType === 'Cardio' ? (
@@ -618,7 +616,13 @@ export default function WorkoutForm({
 															}
 														>
 															<SelectTrigger>
-																<SelectValue placeholder="Select exercise type" />
+																<SelectValue
+																	placeholder={
+																		<span className="text-muted-foreground">
+																			Select exercise type
+																		</span>
+																	}
+																/>
 															</SelectTrigger>
 															<SelectContent>
 																{EXERCISE_TYPES.map((type) => (
@@ -651,7 +655,13 @@ export default function WorkoutForm({
 																	}
 																>
 																	<SelectTrigger>
-																		<SelectValue placeholder="Select muscle group" />
+																		<SelectValue
+																			placeholder={
+																				<span className="text-muted-foreground">
+																					Select muscle group
+																				</span>
+																			}
+																		/>
 																	</SelectTrigger>
 																	<SelectContent>
 																		{MUSCLE_GROUPS.map((group) => (
@@ -680,7 +690,13 @@ export default function WorkoutForm({
 																	}
 																>
 																	<SelectTrigger>
-																		<SelectValue placeholder="Select weight type" />
+																		<SelectValue
+																			placeholder={
+																				<span className="text-muted-foreground">
+																					Select weight type
+																				</span>
+																			}
+																		/>
 																	</SelectTrigger>
 																	<SelectContent>
 																		{WEIGHT_TYPES.map((type) => (
@@ -701,7 +717,7 @@ export default function WorkoutForm({
 															</label>
 															<Input
 																id={`equipmentSettings-${index}`}
-																placeholder="e.g. Seat height: 5"
+																placeholder="e.g. seat height #5"
 																value={exercise.equipmentSettings}
 																onChange={(e) =>
 																	handleExerciseChange(
