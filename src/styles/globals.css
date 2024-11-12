@@ -149,6 +149,118 @@
 	--success-foreground: 347 5% 90%;
 }
 
+/* Stone Theme Light Mode */
+.theme-stone {
+	--background: 70 14% 95%; /* Light version - inverted from dark */
+	--foreground: 70 14% 5%; /* #0d0e0a */
+	--card: 70 14% 98%; /* Slightly lighter than background */
+	--card-foreground: 70 14% 5%;
+	--popover: 70 14% 95%;
+	--popover-foreground: 70 14% 5%;
+	--primary: 73 15% 51%; /* Darker version of #bac1a8 for better contrast */
+	--primary-foreground: 70 14% 95%;
+	--secondary: 231 15% 71%; /* Lighter version of #42465c */
+	--secondary-foreground: 70 14% 5%;
+	--muted: 231 15% 85%; /* Light muted */
+	--muted-foreground: 70 14% 35%;
+	--accent: 282 15% 68%; /* Lighter version of #9a83a6 */
+	--accent-foreground: 70 14% 5%;
+	--destructive: 0 89% 50%;
+	--destructive-foreground: 70 14% 95%;
+	--border: 73 15% 51%; /* Match primary */
+	--input: 73 15% 51%; /* Match primary */
+	--ring: 282 15% 68%; /* Match accent */
+	--radius: 0.5rem;
+	--warning: 36 100% 46%;
+	--warning-foreground: 70 14% 5%;
+	--success: 123 52% 47%;
+	--success-foreground: 70 14% 5%;
+}
+
+/* Stone Theme Dark Mode */
+.dark.theme-stone {
+	--background: 70 14% 5%; /* #0d0e0a */
+	--foreground: 65 10% 92%; /* #edeee8 */
+	--card: 70 14% 8%; /* Slightly lighter than background */
+	--card-foreground: 65 10% 92%;
+	--popover: 70 14% 3%; /* Slightly darker than background */
+	--popover-foreground: 65 10% 92%;
+	--primary: 73 15% 71%; /* #bac1a8 */
+	--primary-foreground: 70 14% 5%;
+	--secondary: 231 15% 31%; /* #42465c */
+	--secondary-foreground: 65 10% 92%;
+	--muted: 231 15% 25%; /* Darker variant of secondary */
+	--muted-foreground: 65 10% 82%;
+	--accent: 282 15% 58%; /* #9a83a6 */
+	--accent-foreground: 65 10% 92%;
+	--destructive: 0 89% 50%;
+	--destructive-foreground: 65 10% 92%;
+	--border: 73 15% 71%; /* Match primary */
+	--input: 73 15% 71%; /* Match primary */
+	--ring: 282 15% 58%; /* Match accent */
+	--radius: 0.5rem;
+	--warning: 36 100% 46%;
+	--warning-foreground: 65 10% 92%;
+	--success: 123 52% 47%;
+	--success-foreground: 65 10% 92%;
+}
+
+/* Orange Theme Light Mode */
+.theme-orange {
+	--background: 30 40% 98%; /* Very light warm beige */
+	--foreground: 15 30% 15%; /* Dark brown text */
+	--card: 30 40% 95%; /* Slightly darker than background */
+	--card-foreground: 15 30% 15%;
+	--popover: 30 40% 98%;
+	--popover-foreground: 15 30% 15%;
+	--primary: 15 75% 45%; /* Rich auburn red */
+	--primary-foreground: 30 40% 98%;
+	--secondary: 25 60% 45%; /* Warm terra cotta */
+	--secondary-foreground: 30 40% 98%;
+	--muted: 25 30% 90%; /* Muted warm gray */
+	--muted-foreground: 15 30% 35%;
+	--accent: 43 80% 50%; /* Golden accent */
+	--accent-foreground: 15 30% 15%;
+	--destructive: 0 85% 50%;
+	--destructive-foreground: 30 40% 98%;
+	--border: 25 40% 80%; /* Soft warm border */
+	--input: 25 40% 80%;
+	--ring: 15 75% 45%; /* Matches primary */
+	--radius: 0.5rem;
+	--warning: 33 100% 50%;
+	--warning-foreground: 15 30% 15%;
+	--success: 123 52% 47%;
+	--success-foreground: 15 30% 15%;
+}
+
+/* Orange Theme Dark Mode */
+.dark.theme-orange {
+	--background: 15 30% 10%; /* Deep brown background */
+	--foreground: 30 25% 90%; /* Warm white text */
+	--card: 15 30% 15%; /* Slightly lighter than background */
+	--card-foreground: 30 25% 90%;
+	--popover: 15 30% 8%; /* Slightly darker than background */
+	--popover-foreground: 30 25% 90%;
+	--primary: 15 75% 55%; /* Bright auburn red */
+	--primary-foreground: 15 30% 90%;
+	--secondary: 25 55% 35%; /* Dark terra cotta */
+	--secondary-foreground: 30 25% 90%;
+	--muted: 25 30% 25%; /* Deep muted brown */
+	--muted-foreground: 30 25% 80%;
+	--accent: 43 80% 45%; /* Rich gold */
+	--accent-foreground: 15 30% 90%;
+	--destructive: 0 85% 50%;
+	--destructive-foreground: 30 25% 90%;
+	--border: 15 75% 55%; /* Matches primary */
+	--input: 15 75% 55%;
+	--ring: 43 80% 45%; /* Matches accent */
+	--radius: 0.5rem;
+	--warning: 33 100% 50%;
+	--warning-foreground: 30 25% 90%;
+	--success: 123 52% 47%;
+	--success-foreground: 30 25% 90%;
+}
+
 /* Base styles */
 @layer base {
 	* {

@@ -54,15 +54,29 @@ export function ColorSchemeSelect() {
 					onClick={() => handleColorSchemeChange('blue')}
 					className="flex items-center"
 				>
-					<div className="w-4 h-4 rounded-full bg-blue-500 mr-2" />
+					<div className="w-4 h-4 rounded-full bg-blue-600 mr-2" />
 					Blue
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => handleColorSchemeChange('purple')}
 					className="flex items-center"
 				>
-					<div className="w-4 h-4 rounded-full bg-purple-500 mr-2" />
+					<div className="w-4 h-4 rounded-full bg-violet-600 mr-2" />
 					Purple
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => handleColorSchemeChange('orange')}
+					className="flex items-center"
+				>
+					<div className="w-4 h-4 rounded-full bg-orange-600 mr-2" />
+					Orange
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => handleColorSchemeChange('stone')}
+					className="flex items-center"
+				>
+					<div className="w-4 h-4 rounded-full bg-stone-400 mr-2" />
+					Stone
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
