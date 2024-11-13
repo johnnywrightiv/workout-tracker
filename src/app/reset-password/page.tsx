@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { login } from '@/store/auth-slice';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,29 +14,23 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { RootState } from '@/store/store';
-import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
-const Signup = () => {
-	const [email, setEmail] = useState('');
+export default function ResetPassword() {
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
-	const [name, setName] = useState('');
-	const [isSigningUp, setIsSigningUp] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const searchParams = useSearchParams();
 	const router = useRouter();
-	const dispatch = useDispatch();
 	const { toast } = useToast();
-	const isAuthenticated = useSelector(
-		(state: RootState) => state.auth.isAuthenticated
-	);
+	const token = searchParams.get('token');
 
 	useEffect(() => {
-		if (isAuthenticated && isSigningUp) {
-			router.push('/');
+		if (!token) {
+			router.push('/login');
 		}
-	}, [isAuthenticated, isSigningUp, router]);
+	}, [token, router]);
 
 	const validatePassword = (
 		password: string
@@ -83,33 +75,27 @@ const Signup = () => {
 		return { isValid: true, message: '' };
 	};
 
-	const handleSignup = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setIsSigningUp(true);
 
-		// Basic validation
-		if (!email || !password || !confirmPassword || !name) {
+		if (!password || !confirmPassword) {
 			toast({
 				title: 'Error',
 				description: 'Please fill in all fields',
 				variant: 'destructive',
 			});
-			setIsSigningUp(false);
 			return;
 		}
 
-		// Password match validation
 		if (password !== confirmPassword) {
 			toast({
 				title: 'Error',
 				description: 'Passwords do not match',
 				variant: 'destructive',
 			});
-			setIsSigningUp(false);
 			return;
 		}
 
-		// Password strength validation
 		const passwordValidation = validatePassword(password);
 		if (!passwordValidation.isValid) {
 			toast({
@@ -117,17 +103,16 @@ const Signup = () => {
 				description: passwordValidation.message,
 				variant: 'destructive',
 			});
-			setIsSigningUp(false);
 			return;
 		}
 
+		setIsSubmitting(true);
+
 		try {
-			const response = await fetch('/api/auth/signup', {
+			const response = await fetch('/api/auth/reset-password', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ email, password, name }),
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ token, password }),
 			});
 
 			const data = await response.json();
@@ -135,31 +120,26 @@ const Signup = () => {
 			if (response.ok) {
 				toast({
 					title: 'Success',
-					description: 'Account created successfully',
+					description: 'Password successfully reset. Redirecting to login...',
 				});
-				dispatch(
-					login({
-						userId: data.userId,
-						email: data.email,
-						name: data.name,
-					})
-				);
+				setTimeout(() => {
+					router.push('/login');
+				}, 2000);
 			} else {
 				toast({
 					title: 'Error',
-					description: data.message || 'Failed to create account',
+					description: data.message || 'Failed to reset password',
 					variant: 'destructive',
 				});
-				setIsSigningUp(false);
 			}
 		} catch (error) {
-			console.error('Signup error:', error);
 			toast({
 				title: 'Error',
 				description: 'An unexpected error occurred',
 				variant: 'destructive',
 			});
-			setIsSigningUp(false);
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -167,45 +147,21 @@ const Signup = () => {
 		<div className="flex justify-center mt-12 bg-background">
 			<Card className="w-[350px]">
 				<CardHeader>
-					<CardTitle>Sign Up</CardTitle>
-					<CardDescription>Create your account to get started</CardDescription>
+					<CardTitle>Reset Password</CardTitle>
+					<CardDescription>Enter your new password</CardDescription>
 				</CardHeader>
-				<form onSubmit={handleSignup}>
+				<form onSubmit={handleSubmit}>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="name">Name</Label>
-							<Input
-								id="name"
-								placeholder="First Last"
-								type="text"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-								required
-								disabled={isSigningUp}
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="email">Email</Label>
-							<Input
-								id="email"
-								type="email"
-								placeholder="Email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								required
-								disabled={isSigningUp}
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="password">Password</Label>
+							<Label htmlFor="password">New Password</Label>
 							<Input
 								id="password"
 								type="password"
-								placeholder="Password"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
+								placeholder="Enter new password"
 								required
-								disabled={isSigningUp}
+								disabled={isSubmitting}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -213,11 +169,11 @@ const Signup = () => {
 							<Input
 								id="confirmPassword"
 								type="password"
-								placeholder="Confirm Password"
 								value={confirmPassword}
 								onChange={(e) => setConfirmPassword(e.target.value)}
+								placeholder="Confirm new password"
 								required
-								disabled={isSigningUp}
+								disabled={isSubmitting}
 							/>
 						</div>
 						<div className="text-sm text-muted-foreground">
@@ -232,31 +188,20 @@ const Signup = () => {
 						</div>
 					</CardContent>
 					<CardFooter>
-						<Button type="submit" className="w-full" disabled={isSigningUp}>
-							{isSigningUp ? (
+						<Button type="submit" className="w-full" disabled={isSubmitting}>
+							{isSubmitting ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Signing up...
+									Resetting...
 								</>
 							) : (
-								'Sign Up'
+								'Reset Password'
 							)}
 						</Button>
 					</CardFooter>
-					<div className="mb-4 text-sm flex justify-center items-center">
-						Already have an account?
-						<Link
-							href="/login"
-							className="ml-2 text-primary hover:text-primary/80"
-						>
-							Log In
-						</Link>
-					</div>
 				</form>
 			</Card>
 			<Toaster />
 		</div>
 	);
-};
-
-export default Signup;
+}

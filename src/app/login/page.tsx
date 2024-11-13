@@ -15,17 +15,19 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { RootState } from '@/store/store';
+import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 const Login = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-	const [error, setError] = useState('');
 	const [isLoggingIn, setIsLoggingIn] = useState(false);
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const { toast } = useToast();
 	const isAuthenticated = useSelector(
 		(state: RootState) => state.auth.isAuthenticated
 	);
@@ -38,8 +40,17 @@ const Login = () => {
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError('');
 		setIsLoggingIn(true);
+
+		if (!email || !password) {
+			toast({
+				title: 'Error',
+				description: 'Please fill in all fields',
+				variant: 'destructive',
+			});
+			setIsLoggingIn(false);
+			return;
+		}
 
 		try {
 			const response = await fetch('/api/auth/login', {
@@ -53,6 +64,10 @@ const Login = () => {
 			const data = await response.json();
 
 			if (response.ok) {
+				toast({
+					title: 'Success',
+					description: 'Login successful',
+				});
 				dispatch(
 					login({
 						userId: data.userId,
@@ -62,12 +77,20 @@ const Login = () => {
 					})
 				);
 			} else {
-				setError(data.message || 'Login failed');
+				toast({
+					title: 'Error',
+					description: data.message || 'Invalid email or password',
+					variant: 'destructive',
+				});
 				setIsLoggingIn(false);
 			}
 		} catch (error) {
 			console.error('Login error:', error);
-			setError('An unexpected error occurred');
+			toast({
+				title: 'Error',
+				description: 'An unexpected error occurred',
+				variant: 'destructive',
+			});
 			setIsLoggingIn(false);
 		}
 	};
@@ -83,13 +106,6 @@ const Login = () => {
 				</CardHeader>
 				<form onSubmit={handleLogin}>
 					<CardContent className="space-y-4">
-						{error && (
-							<Alert variant="destructive">
-								<AlertCircle className="h-4 w-4" />
-								<AlertTitle>Error</AlertTitle>
-								<AlertDescription>{error}</AlertDescription>
-							</Alert>
-						)}
 						<div className="space-y-2">
 							<Label htmlFor="email">Email</Label>
 							<Input
@@ -113,6 +129,14 @@ const Login = () => {
 								required
 								disabled={isLoggingIn}
 							/>
+							<div className="flex justify-end items-center">
+								<Link
+									href="/forgot-password"
+									className="text-sm text-primary hover:text-primary/80"
+								>
+									Forgot Password?
+								</Link>
+							</div>
 						</div>
 					</CardContent>
 					<CardFooter>
@@ -129,6 +153,7 @@ const Login = () => {
 					</CardFooter>
 				</form>
 			</Card>
+			<Toaster />
 		</div>
 	);
 };

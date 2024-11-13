@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
 		colorScheme: { type: String, default: 'blue' },
 		measurementSystem: { type: String, default: 'metric' },
 	},
+	resetPasswordToken: { type: String },
+	resetPasswordExpires: { type: Date },
 });
 
 userSchema.methods.comparePassword = async function (password: string) {

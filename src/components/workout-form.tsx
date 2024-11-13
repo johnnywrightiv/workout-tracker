@@ -900,7 +900,7 @@ export default function WorkoutForm({
 							{id ? 'Updating...' : 'Creating...'}
 						</>
 					) : (
-						`${id ? 'Save' : 'Create'} ${isTemplate ? 'Template' : 'Workout'}`
+						`Save ${isTemplate ? 'Template' : 'Workout'}`
 					)}
 				</Button>
 			</form>
