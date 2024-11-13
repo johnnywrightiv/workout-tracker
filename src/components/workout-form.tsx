@@ -59,17 +59,17 @@ export const EXERCISE_TYPES = ['Strength', 'Cardio'] as const;
 
 interface Exercise {
 	name: string;
-	sets: number | undefined;
-	reps: number | undefined;
-	weight: number | undefined;
+	sets: number;
+	reps: number;
+	weight: number;
 	notes: string;
 	muscleGroup: string;
 	weightType: string;
 	equipmentSettings: string;
-	duration: number | undefined;
+	duration: number;
 	exerciseType: string;
-	speed: number | undefined;
-	distance: number | undefined;
+	speed: number;
+	distance: number;
 }
 
 interface FormData {
@@ -253,17 +253,17 @@ export default function WorkoutForm({
 				...formData.exercises,
 				{
 					name: '',
-					sets: undefined,
-					reps: undefined,
-					weight: undefined,
+					sets: 0,
+					reps: 0,
+					weight: 0,
 					notes: '',
 					muscleGroup: '',
 					weightType: '',
 					equipmentSettings: '',
-					duration: undefined,
+					duration: 0,
 					exerciseType: '',
-					speed: undefined,
-					distance: undefined,
+					speed: 0,
+					distance: 0,
 				},
 			],
 		});
@@ -388,7 +388,7 @@ export default function WorkoutForm({
 			toast({
 				variant: 'destructive',
 				title: 'Error',
-				description: `Failed to ${id ? 'update' : 'create'} ${isTemplate ? 'template' : 'workout'}. Please try again.`,
+				description: `Error: ${error}. Failed to ${id ? 'update' : 'create'} ${isTemplate ? 'template' : 'workout'}. Please try again.`,
 			});
 		} finally {
 			setIsLoading(false);
@@ -445,7 +445,7 @@ export default function WorkoutForm({
 																type="button"
 																onClick={handleStartWorkout}
 																size="sm"
-																variant="outline"
+																variant="default"
 															>
 																Start Workout
 															</Button>
@@ -475,7 +475,9 @@ export default function WorkoutForm({
 										{workoutStatus === 'completed' && (
 											<div className="sm:text-sm text-xs flex items-center justify-evenly">
 												<div className="flex items-center space-x-1">
-													<span>Start: {formatTime(formData.startTime)} - </span>
+													<span>
+														Start: {formatTime(formData.startTime)} -{' '}
+													</span>
 													<span>End: {formatTime(formData.endTime)}</span>
 												</div>
 												<div className="flex items-center space-x-1 sm:space-x-2">
@@ -566,8 +568,9 @@ export default function WorkoutForm({
 												</span>
 											)}
 
+										{/* Display notes, force them to the next row */}
 										{exercise.notes && (
-											<span className="text-sm text-start text-muted-foreground ml-8 -mt-2">
+											<span className="text-sm text-start text-muted-foreground w-full ml-8 -mt-2">
 												{exercise.notes}
 											</span>
 										)}

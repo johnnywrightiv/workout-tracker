@@ -150,7 +150,6 @@ export default function TemplatesPage() {
 						</CardHeader>
 						<CardContent>
 							<div className="flex flex-col space-y-1 text-muted-foreground">
-								<p>Duration: {template.duration} minutes</p>
 								<p>Exercises: {template.exercises.length}</p>
 							</div>
 						</CardContent>

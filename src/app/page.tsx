@@ -205,10 +205,10 @@ export default function Home() {
 
 	const FilterContent = () => (
 		<>
-			<SheetHeader>
+			<SheetHeader className='mt-4'>
 				<SheetTitle>Filter Workouts</SheetTitle>
 			</SheetHeader>
-			<SheetDescription>
+			<SheetDescription className='mb-2'>
 				Configure options to filter your workout history{' '}
 			</SheetDescription>
 			<div className="py-4 space-y-6">
@@ -219,7 +219,7 @@ export default function Home() {
 							<PopoverTrigger asChild>
 								<Button
 									variant="outline"
-									className="justify-start text-left font-normal w-full sm:w-[140px]"
+									className="justify-start text-left font-normal w-full sm:w-[140px] whitespace-nowrap truncate max-w-full"
 								>
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{filters.dateRange.from ? (
@@ -250,7 +250,7 @@ export default function Home() {
 							<PopoverTrigger asChild>
 								<Button
 									variant="outline"
-									className="justify-start text-left font-normal w-full sm:w-[140px]"
+									className="justify-start text-left font-normal w-full sm:w-[140px] whitespace-nowrap truncate max-w-full"
 								>
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{filters.dateRange.to ? (
@@ -325,7 +325,7 @@ export default function Home() {
 					</div>
 				))}
 			</div>
-			<SheetFooter>
+			<SheetFooter className='mt-8'>
 				<Button variant="outline" onClick={resetFilters} className="w-full">
 					Reset Filters
 				</Button>
