@@ -205,10 +205,10 @@ export default function Home() {
 
 	const FilterContent = () => (
 		<>
-			<SheetHeader className='mt-4'>
+			<SheetHeader className="mt-4">
 				<SheetTitle>Filter Workouts</SheetTitle>
 			</SheetHeader>
-			<SheetDescription className='mb-2'>
+			<SheetDescription className="mb-2">
 				Configure options to filter your workout history{' '}
 			</SheetDescription>
 			<div className="py-4 space-y-6">
@@ -325,7 +325,7 @@ export default function Home() {
 					</div>
 				))}
 			</div>
-			<SheetFooter className='mt-8'>
+			<SheetFooter className="mt-8">
 				<Button variant="outline" onClick={resetFilters} className="w-full">
 					Reset Filters
 				</Button>

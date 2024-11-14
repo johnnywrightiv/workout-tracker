@@ -6,18 +6,18 @@ import { z } from 'zod';
 
 // Define the exercise schema
 const exerciseSchema = z.object({
-    name: z.string().min(1).max(100).trim(),
-    sets: z.number().min(0).max(1000).optional(),
-    reps: z.number().min(0).max(1000).optional(),
-    weight: z.number().min(0).max(2000).optional(),
-    notes: z.string().max(1000).optional(),
-    muscleGroup: z.string().max(100).optional(),
-    weightType: z.string().max(50).optional(),
-    equipmentSettings: z.string().max(200).optional(),
-    duration: z.number().min(0).max(86400).optional(), // max 24 hours in seconds
-    exerciseType: z.string().max(50).optional(),
-    speed: z.number().min(0).max(100).optional(),
-    distance: z.number().min(0).max(1000).optional(),
+	name: z.string().min(1).max(100).trim(),
+	sets: z.number().min(0).max(1000).optional(),
+	reps: z.number().min(0).max(1000).optional(),
+	weight: z.number().min(0).max(2000).optional(),
+	notes: z.string().max(1000).optional(),
+	muscleGroup: z.string().max(100).optional(),
+	weightType: z.string().max(50).optional(),
+	equipmentSettings: z.string().max(200).optional(),
+	duration: z.number().min(0).max(86400).optional(), // max 24 hours in seconds
+	exerciseType: z.string().max(50).optional(),
+	speed: z.number().min(0).max(100).optional(),
+	distance: z.number().min(0).max(1000).optional(),
 });
 
 const templateSchema = z.object({

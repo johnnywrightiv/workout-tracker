@@ -27,7 +27,12 @@ export function ColorSchemeProvider({
 
 	useEffect(() => {
 		if (!isLoading) {
-			document.documentElement.classList.remove('theme-blue', 'theme-purple', 'theme-orange', 'theme-stone');
+			document.documentElement.classList.remove(
+				'theme-blue',
+				'theme-purple',
+				'theme-orange',
+				'theme-stone'
+			);
 			document.documentElement.classList.add(`theme-${colorScheme}`);
 			localStorage.setItem('colorScheme', colorScheme);
 		}
