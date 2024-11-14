@@ -2,6 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongoose';
 import Template from '@/models/template';
 import { verifyAuth } from '@/middleware/verify-auth';
+import { z } from 'zod';
+
+// Define the exercise schema
+const exerciseSchema = z.object({
+	name: z.string().min(1).max(100).trim(),
+	sets: z.number().min(0).max(1000).optional(),
+	reps: z.number().min(0).max(1000).optional(),
+	weight: z.number().min(0).max(2000).optional(),
+	notes: z.string().max(1000).optional(),
+	muscleGroup: z.string().max(100).optional(),
+	weightType: z.string().max(50).optional(),
+	equipmentSettings: z.string().max(200).optional(),
+	duration: z.number().min(0).max(86400).optional(), // max 24 hours in seconds
+	exerciseType: z.string().max(50).optional(),
+	speed: z.number().min(0).max(100).optional(),
+	distance: z.number().min(0).max(1000).optional(),
+});
+
+const templateSchema = z.object({
+	name: z.string().min(1).max(100).trim(),
+	duration: z.number().min(0).max(86400).optional(),
+	notes: z.string().max(1000).optional(),
+	exercises: z.array(exerciseSchema).min(1).max(100),
+});
 
 type Props = {
 	params: {
@@ -9,120 +33,142 @@ type Props = {
 	};
 };
 
-export async function GET(request: NextRequest, props: Props) {
-	// Verify the user's authentication
-	const user = verifyAuth(request);
-	if (!user) {
-		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-	}
+export async function GET(request: NextRequest, { params }: Props) {
+	try {
+		const user = await verifyAuth(request);
+		if (!user?.userId) {
+			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
 
-	// Connect to the database
-	await connectToDatabase();
+		await connectToDatabase();
 
-	// Fetch the template based on userId and templateId
-	const template = await Template.findOne({
-		_id: props.params.id,
-		user_id: user.userId,
-	});
+		if (
+			!z
+				.string()
+				.regex(/^[0-9a-fA-F]{24}$/)
+				.safeParse(params.id).success
+		) {
+			return NextResponse.json(
+				{ message: 'Invalid template ID' },
+				{ status: 400 }
+			);
+		}
 
-	// If template not found, return 404
-	if (!template) {
+		const template = await Template.findOne({
+			_id: params.id,
+			user_id: user.userId,
+		}).lean();
+
+		if (!template) {
+			return NextResponse.json(
+				{ message: 'Template not found' },
+				{ status: 404 }
+			);
+		}
+
+		return NextResponse.json(template);
+	} catch (error) {
+		console.error('Template fetch error:', error);
 		return NextResponse.json(
-			{ message: 'Template not found' },
-			{ status: 404 }
+			{ message: 'Internal server error' },
+			{ status: 500 }
 		);
 	}
-
-	// Return the template data as JSON
-	return NextResponse.json(template);
 }
 
-export async function PUT(request: NextRequest, props: Props) {
-	const user = verifyAuth(request);
-	if (!user) {
-		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-	}
+export async function PUT(request: NextRequest, { params }: Props) {
+	try {
+		const user = await verifyAuth(request);
+		if (!user?.userId) {
+			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
 
-	await connectToDatabase();
-	const data = await request.json();
+		await connectToDatabase();
 
-	// Define the exercise interface
-	interface Exercise {
-		name: string;
-		sets?: number;
-		reps?: number;
-		weight?: number;
-		notes?: string;
-		muscleGroup?: string;
-		weightType?: string;
-		equipmentSettings?: string;
-		duration?: number;
-		exerciseType?: string;
-		speed?: number;
-		distance?: number;
-	}
+		if (
+			!z
+				.string()
+				.regex(/^[0-9a-fA-F]{24}$/)
+				.safeParse(params.id).success
+		) {
+			return NextResponse.json(
+				{ message: 'Invalid template ID' },
+				{ status: 400 }
+			);
+		}
 
-	// Prepare the update data with all fields
-	const updateData = {
-		name: data.name,
-		duration: data.duration,
-		notes: data.notes,
-		exercises: data.exercises.map((exercise: Exercise) => ({
-			name: exercise.name,
-			sets: exercise.sets,
-			reps: exercise.reps,
-			weight: exercise.weight,
-			notes: exercise.notes,
-			muscleGroup: exercise.muscleGroup,
-			weightType: exercise.weightType,
-			equipmentSettings: exercise.equipmentSettings,
-			duration: exercise.duration,
-			exerciseType: exercise.exerciseType,
-			speed: exercise.speed,
-			distance: exercise.distance,
-		})),
-	};
+		const body = await request.json();
+		const validatedData = templateSchema.parse(body);
 
-	const template = await Template.findOneAndUpdate(
-		{ _id: props.params.id, user_id: user.userId },
-		{ $set: updateData },
-		{ new: true }
-	);
+		const template = await Template.findOneAndUpdate(
+			{ _id: params.id, user_id: user.userId },
+			{ $set: validatedData },
+			{ new: true, runValidators: true }
+		).lean();
 
-	if (!template) {
+		if (!template) {
+			return NextResponse.json(
+				{ message: 'Template not found' },
+				{ status: 404 }
+			);
+		}
+
+		return NextResponse.json(template);
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return NextResponse.json(
+				{ message: 'Invalid input format', errors: error.errors },
+				{ status: 400 }
+			);
+		}
+
+		console.error('Template update error:', error);
 		return NextResponse.json(
-			{ message: 'Template not found' },
-			{ status: 404 }
+			{ message: 'Internal server error' },
+			{ status: 500 }
 		);
 	}
-
-	return NextResponse.json(template);
 }
 
-export async function DELETE(request: NextRequest, props: Props) {
-	// Verify the user's authentication
-	const user = verifyAuth(request);
-	if (!user) {
-		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-	}
+export async function DELETE(request: NextRequest, { params }: Props) {
+	try {
+		const user = await verifyAuth(request);
+		if (!user?.userId) {
+			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
 
-	// Connect to the database
-	await connectToDatabase();
+		await connectToDatabase();
 
-	// Find and delete the template based on ID and user ID
-	const template = await Template.findOneAndDelete({
-		_id: props.params.id,
-		user_id: user.userId,
-	});
+		if (
+			!z
+				.string()
+				.regex(/^[0-9a-fA-F]{24}$/)
+				.safeParse(params.id).success
+		) {
+			return NextResponse.json(
+				{ message: 'Invalid template ID' },
+				{ status: 400 }
+			);
+		}
 
-	// If template not found, return 404
-	if (!template) {
+		const template = await Template.findOneAndDelete({
+			_id: params.id,
+			user_id: user.userId,
+		}).lean();
+
+		if (!template) {
+			return NextResponse.json(
+				{ message: 'Template not found' },
+				{ status: 404 }
+			);
+		}
+
+		return NextResponse.json({ message: 'Template deleted successfully' });
+	} catch (error) {
+		console.error('Template deletion error:', error);
 		return NextResponse.json(
-			{ message: 'Template not found' },
-			{ status: 404 }
+			{ message: 'Internal server error' },
+			{ status: 500 }
 		);
 	}
-
-	// Return success message
-	return NextResponse.json({ message: 'Template deleted' });
 }

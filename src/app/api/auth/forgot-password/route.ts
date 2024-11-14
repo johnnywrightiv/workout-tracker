@@ -3,37 +3,50 @@ import crypto from 'crypto';
 import User from '@/models/user';
 import connectToDatabase from '@/lib/mongodb';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { z } from 'zod';
+
+const requestSchema = z.object({
+	email: z.string().email().toLowerCase().trim(),
+});
 
 export async function POST(req: NextRequest) {
 	try {
 		await connectToDatabase();
-		const { email } = await req.json();
+
+		const body = await req.json();
+		const { email } = requestSchema.parse(body);
 
 		const user = await User.findOne({ email });
-		if (!user) {
-			// Return success even if user not found for security
-			return NextResponse.json({
-				message: 'If an account exists, a reset link will be sent.',
-			});
+
+		const response = {
+			message: 'If an account exists, a reset link will be sent.',
+		};
+
+		if (user) {
+			const resetToken = crypto.randomBytes(32).toString('hex');
+			const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+			user.resetPasswordToken = resetToken;
+			user.resetPasswordExpires = resetTokenExpiry;
+			await user.save();
+
+			const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+			if (!baseUrl) {
+				throw new Error('BASE_URL environment variable is not set');
+			}
+
+			await sendPasswordResetEmail(email, resetToken, baseUrl);
 		}
 
-		// Generate reset token
-		const resetToken = crypto.randomBytes(32).toString('hex');
-		const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
-
-		// Save token to user
-		user.resetPasswordToken = resetToken;
-		user.resetPasswordExpires = resetTokenExpiry;
-		await user.save();
-
-		// Send email
-		const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-		await sendPasswordResetEmail(email, resetToken, baseUrl);
-
-		return NextResponse.json({
-			message: 'Password reset email sent',
-		});
+		return NextResponse.json(response);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return NextResponse.json(
+				{ message: 'Invalid email format' },
+				{ status: 400 }
+			);
+		}
+
 		console.error('Password reset request error:', error);
 		return NextResponse.json(
 			{ message: 'Internal server error' },

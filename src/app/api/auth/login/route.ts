@@ -3,19 +3,19 @@ import bcrypt from 'bcryptjs';
 import User from '@/models/user';
 import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+	email: z.string().email().toLowerCase().trim(),
+	password: z.string().min(8),
+});
 
 export async function POST(req: NextRequest) {
 	try {
 		await connectToDatabase();
 
-		const { email, password } = await req.json();
-
-		if (!email || !password) {
-			return NextResponse.json(
-				{ message: 'Email and password are required' },
-				{ status: 400 }
-			);
-		}
+		const body = await req.json();
+		const { email, password } = loginSchema.parse(body);
 
 		const existingUser = await User.findOne({ email });
 
@@ -38,19 +38,24 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const token = jwt.sign(
-			{ userId: existingUser._id },
-			process.env.JWT_SECRET || 'fallback-secret-for-development',
-			{ expiresIn: '1h' }
-		);
+		const jwtSecret = process.env.JWT_SECRET;
+		if (!jwtSecret) {
+			throw new Error('JWT_SECRET environment variable is not set');
+		}
+
+		const token = jwt.sign({ userId: existingUser._id }, jwtSecret, {
+			expiresIn: '1h',
+		});
 
 		const response = NextResponse.json(
 			{
 				message: 'Login successful',
-				userId: existingUser._id,
-				email: existingUser.email,
-				name: existingUser.name,
-				preferences: existingUser.preferences,
+				user: {
+					userId: existingUser._id,
+					email: existingUser.email,
+					name: existingUser.name,
+					preferences: existingUser.preferences,
+				},
 			},
 			{ status: 200 }
 		);
@@ -58,12 +63,20 @@ export async function POST(req: NextRequest) {
 		response.cookies.set('token', token, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'lax',
 			maxAge: 3600,
 			path: '/',
 		});
 
 		return response;
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return NextResponse.json(
+				{ message: 'Invalid email or password format' },
+				{ status: 400 }
+			);
+		}
+
 		console.error('Login error:', error);
 		return NextResponse.json(
 			{ message: 'Internal server error' },
