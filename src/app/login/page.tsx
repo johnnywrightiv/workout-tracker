@@ -85,7 +85,7 @@ const Login = () => {
 				setIsLoggingIn(false);
 			}
 		} catch (error) {
-			console.error('Login error:', error);
+			console.error('Login error2:', error);
 			toast({
 				title: 'Error',
 				description: 'An unexpected error occurred',
