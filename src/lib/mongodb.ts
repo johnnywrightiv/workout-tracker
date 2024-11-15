@@ -10,12 +10,15 @@ if (!MONGODB_URI) {
 }
 
 async function connectToDatabase() {
-	const opts = {
-		bufferCommands: false,
-	};
-
+	const start = Date.now();
 	try {
-		const connection = await mongoose.connect(MONGODB_URI, opts);
+		const connection = await mongoose.connect(MONGODB_URI, {
+			bufferCommands: false,
+			connectTimeoutMS: 30000,
+			socketTimeoutMS: 30000,
+		});
+		const elapsed = Date.now() - start;
+		console.log(`MongoDB connected in ${elapsed} ms`);
 		return connection;
 	} catch (error) {
 		console.error('MongoDB connection error:', error);

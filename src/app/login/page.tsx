@@ -62,6 +62,7 @@ const Login = () => {
 			});
 
 			const data = await response.json();
+			console.log('Login response data:', data);
 
 			if (response.ok) {
 				toast({
@@ -77,6 +78,7 @@ const Login = () => {
 					})
 				);
 			} else {
+				console.error('Login failed:', data.message || 'Unknown error');
 				toast({
 					title: 'Error',
 					description: data.message || 'Invalid email or password',

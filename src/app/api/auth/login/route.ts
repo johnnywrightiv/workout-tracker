@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
 		const { email, password } = loginSchema.parse(body);
 
 		const existingUser = await User.findOne({ email });
-
 		if (!existingUser) {
 			return NextResponse.json(
 				{ message: 'Invalid credentials' },
@@ -32,7 +31,6 @@ export async function POST(req: NextRequest) {
 			password,
 			existingUser.password_hash
 		);
-
 		if (!isPasswordValid) {
 			return NextResponse.json(
 				{ message: 'Invalid credentials' },
@@ -70,16 +68,10 @@ export async function POST(req: NextRequest) {
 			path: '/',
 		});
 
+		console.log('Login response:', response); // Log the response
 		return response;
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ message: 'Invalid email or password format' },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Login error1:', error);
+		console.error('Login error:', error);
 		return NextResponse.json(
 			{ message: 'Internal server error' },
 			{ status: 500 }
