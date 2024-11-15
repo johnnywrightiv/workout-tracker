@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const loginSchema = z.object({
 	email: z.string().email().toLowerCase().trim(),
 	password: z.string().min(8),
