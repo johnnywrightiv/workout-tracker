@@ -101,11 +101,10 @@ const IncrementDecrementButton = ({
 	step?: number;
 	allowDecimals?: boolean;
 }) => (
-	<div className="flex items-center">
+	<div className="flex items-center justify-center w-full gap-2">
 		<Button
 			type="button"
 			variant="outline"
-			size="icon"
 			onClick={() => {
 				const newValue = Number(Math.max(min, value - step).toFixed(2));
 				onChange(newValue);
@@ -127,14 +126,13 @@ const IncrementDecrementButton = ({
 					allowDecimals ? Number(newValue.toFixed(2)) : Math.floor(newValue)
 				);
 			}}
-			className="flex w-16 h-8 text-center mx-1"
+			className="flex w-20 h-8 text-center mx-1"
 			min={min}
 			step={allowDecimals ? '0.01' : '1'}
 		/>
 		<Button
 			type="button"
 			variant="outline"
-			size="icon"
 			onClick={() => {
 				const newValue = Number((value + step).toFixed(2));
 				onChange(newValue);
@@ -736,7 +734,7 @@ export default function WorkoutForm({
 
 												{/* Cardio or Strength Input Values */}
 												{exercise.exerciseType === 'Cardio' ? (
-													<div className="grid grid-cols-3 gap-2 min-w-0">
+													<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
 														<div className="space-y-2 min-w-0">
 															<label
 																htmlFor={`duration-${index}`}
@@ -797,22 +795,24 @@ export default function WorkoutForm({
 														</div>
 													</div>
 												) : exercise.exerciseType === 'Strength' ? (
-													<div className="grid grid-cols-3 gap-2 min-w-0">
+													<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
 														<div className="space-y-2 min-w-0">
-															<label
-																htmlFor={`sets-${index}`}
-																className="text-sm font-medium truncate"
-															>
-																Sets
-															</label>
-															<IncrementDecrementButton
-																value={exercise.sets}
-																onChange={(value) =>
-																	handleExerciseChange(index, 'sets', value)
-																}
-															/>
+															<div className="text-center space-y-2">
+																<label
+																	htmlFor={`sets-${index}`}
+																	className="text-sm font-medium truncate text-clip"
+																>
+																	Sets
+																</label>
+																<IncrementDecrementButton
+																	value={exercise.sets}
+																	onChange={(value) =>
+																		handleExerciseChange(index, 'sets', value)
+																	}
+																/>
+															</div>
 														</div>
-														<div className="space-y-2 min-w-0">
+														<div className="text-center space-y-2 min-w-0">
 															<label
 																htmlFor={`reps-${index}`}
 																className="text-sm font-medium truncate"
@@ -826,7 +826,7 @@ export default function WorkoutForm({
 																}
 															/>
 														</div>
-														<div className="space-y-2 min-w-0">
+														<div className="text-center space-y-2 min-w-0">
 															<label
 																htmlFor={`weight-${index}`}
 																className="text-sm font-medium truncate"
