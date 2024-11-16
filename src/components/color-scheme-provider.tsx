@@ -10,12 +10,15 @@ export function ColorSchemeProvider({
 	children: React.ReactNode;
 }) {
 	const [isLoading, setIsLoading] = useState(true);
+	const isAuthenticated = useSelector(
+		(state: RootState) => state.auth.isAuthenticated
+	);
 	const colorScheme = useSelector(
 		(state: RootState) => state.auth.user?.preferences?.colorScheme || 'blue'
 	);
 
+	// Initial setup effect
 	useEffect(() => {
-		// Check local storage first
 		const storedScheme = localStorage.getItem('colorScheme');
 		if (storedScheme) {
 			document.documentElement.classList.add(`theme-${storedScheme}`);
@@ -25,18 +28,29 @@ export function ColorSchemeProvider({
 		setIsLoading(false);
 	}, []);
 
+	// Theme update effect
 	useEffect(() => {
 		if (!isLoading) {
-			document.documentElement.classList.remove(
+			const newTheme = `theme-${colorScheme}`;
+			const root = document.documentElement;
+
+			// Remove all possible theme classes
+			root.classList.remove(
 				'theme-blue',
 				'theme-purple',
 				'theme-orange',
 				'theme-stone'
 			);
-			document.documentElement.classList.add(`theme-${colorScheme}`);
-			localStorage.setItem('colorScheme', colorScheme);
+
+			// Add new theme class
+			root.classList.add(newTheme);
+
+			// Only update localStorage if user is authenticated
+			if (isAuthenticated) {
+				localStorage.setItem('colorScheme', colorScheme);
+			}
 		}
-	}, [colorScheme, isLoading]);
+	}, [colorScheme, isLoading, isAuthenticated]);
 
 	if (isLoading) {
 		return null;

@@ -13,16 +13,22 @@ import {
 import { updateUserPreferences } from '@/store/auth-slice';
 import { RootState } from '@/store/store';
 
+type ColorScheme = 'blue' | 'purple' | 'orange' | 'stone';
+
 export function ColorSchemeSelect() {
 	const dispatch = useDispatch();
-	const colorScheme = useSelector(
+	const currentScheme = useSelector(
 		(state: RootState) => state.auth.user?.preferences?.colorScheme || 'blue'
 	);
 
-	const handleColorSchemeChange = async (newScheme: string) => {
+	const handleColorSchemeChange = async (newScheme: ColorScheme) => {
 		try {
-			localStorage.setItem('colorScheme', newScheme);
+			// Store current values for potential rollback
+			const previousScheme = currentScheme;
+
+			// Optimistically update local state
 			dispatch(updateUserPreferences({ colorScheme: newScheme }));
+			localStorage.setItem('colorScheme', newScheme);
 
 			const response = await fetch('/api/user/preferences', {
 				method: 'PUT',
@@ -32,52 +38,48 @@ export function ColorSchemeSelect() {
 				body: JSON.stringify({ colorScheme: newScheme }),
 			});
 
+			const data = await response.json();
+
 			if (!response.ok) {
-				console.error('Failed to update color scheme on server');
-				// Optionally, revert the local change if the server update fails
+				// Revert both Redux and localStorage if the request failed
+				dispatch(updateUserPreferences({ colorScheme: previousScheme }));
+				localStorage.setItem('colorScheme', previousScheme);
+				throw new Error(data.message || 'Failed to update color scheme');
 			}
 		} catch (error) {
 			console.error('Error updating color scheme:', error);
 		}
 	};
 
+	const colorSchemes: { scheme: ColorScheme; bgClass: string }[] = [
+		{ scheme: 'blue', bgClass: 'bg-blue-600' },
+		{ scheme: 'purple', bgClass: 'bg-violet-600' },
+		{ scheme: 'orange', bgClass: 'bg-orange-600' },
+		{ scheme: 'stone', bgClass: 'bg-stone-400' },
+	];
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="default" className="flex items-center gap-2">
 					<Palette className="h-4 w-4" />
-					<span>Color Scheme</span>
+					<span>
+						Color Scheme:{' '}
+						{currentScheme.charAt(0).toUpperCase() + currentScheme.slice(1)}
+					</span>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
-				<DropdownMenuItem
-					onClick={() => handleColorSchemeChange('blue')}
-					className="flex items-center"
-				>
-					<div className="w-4 h-4 rounded-full bg-blue-600 mr-2" />
-					Blue
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => handleColorSchemeChange('purple')}
-					className="flex items-center"
-				>
-					<div className="w-4 h-4 rounded-full bg-violet-600 mr-2" />
-					Purple
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => handleColorSchemeChange('orange')}
-					className="flex items-center"
-				>
-					<div className="w-4 h-4 rounded-full bg-orange-600 mr-2" />
-					Orange
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => handleColorSchemeChange('stone')}
-					className="flex items-center"
-				>
-					<div className="w-4 h-4 rounded-full bg-stone-400 mr-2" />
-					Stone
-				</DropdownMenuItem>
+				{colorSchemes.map(({ scheme, bgClass }) => (
+					<DropdownMenuItem
+						key={scheme}
+						onClick={() => handleColorSchemeChange(scheme)}
+						className="flex items-center cursor-pointer"
+					>
+						<div className={`w-4 h-4 rounded-full ${bgClass} mr-2`} />
+						{scheme.charAt(0).toUpperCase() + scheme.slice(1)}
+					</DropdownMenuItem>
+				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

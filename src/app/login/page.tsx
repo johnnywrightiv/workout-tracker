@@ -62,19 +62,19 @@ const Login = () => {
 			});
 
 			const data = await response.json();
-			console.log('Login response data:', data);
 
 			if (response.ok) {
 				toast({
 					title: 'Success',
 					description: 'Login successful',
 				});
+				// Updated to match the API response structure
 				dispatch(
 					login({
-						userId: data.userId,
-						email: data.email,
-						name: data.name,
-						preferences: data.preferences,
+						userId: data.user.userId,
+						email: data.user.email,
+						name: data.user.name,
+						preferences: data.user.preferences,
 					})
 				);
 			} else {
@@ -87,7 +87,7 @@ const Login = () => {
 				setIsLoggingIn(false);
 			}
 		} catch (error) {
-			console.error('Login error2:', error);
+			console.error('Login error:', error);
 			toast({
 				title: 'Error',
 				description: 'An unexpected error occurred',

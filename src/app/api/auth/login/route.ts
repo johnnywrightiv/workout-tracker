@@ -13,6 +13,11 @@ const loginSchema = z.object({
 	password: z.string().min(8),
 });
 
+const defaultPreferences = {
+	colorScheme: 'blue' as const,
+	measurementSystem: 'metric' as const,
+};
+
 export async function POST(req: NextRequest) {
 	try {
 		await connectToDatabase();
@@ -20,7 +25,7 @@ export async function POST(req: NextRequest) {
 		const body = await req.json();
 		const { email, password } = loginSchema.parse(body);
 
-		const existingUser = await User.findOne({ email });
+		const existingUser = await User.findOne({ email }).select('+password_hash');
 		if (!existingUser) {
 			return NextResponse.json(
 				{ message: 'Invalid credentials' },
@@ -48,6 +53,12 @@ export async function POST(req: NextRequest) {
 			expiresIn: '1h',
 		});
 
+		// Merge default preferences with user preferences
+		const userPreferences = {
+			...defaultPreferences,
+			...existingUser.preferences,
+		};
+
 		const response = NextResponse.json(
 			{
 				message: 'Login successful',
@@ -55,7 +66,7 @@ export async function POST(req: NextRequest) {
 					userId: existingUser._id,
 					email: existingUser.email,
 					name: existingUser.name,
-					preferences: existingUser.preferences,
+					preferences: userPreferences,
 				},
 			},
 			{ status: 200 }
@@ -69,10 +80,15 @@ export async function POST(req: NextRequest) {
 			path: '/',
 		});
 
-		console.log('Login response:', response); // Log the response
 		return response;
 	} catch (error) {
 		console.error('Login error:', error);
+		if (error instanceof z.ZodError) {
+			return NextResponse.json(
+				{ message: 'Invalid login data', errors: error.errors },
+				{ status: 400 }
+			);
+		}
 		return NextResponse.json(
 			{ message: 'Internal server error' },
 			{ status: 500 }

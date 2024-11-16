@@ -13,15 +13,25 @@ import {
 import { updateUserPreferences } from '@/store/auth-slice';
 import { RootState } from '@/store/store';
 
+type MeasurementSystem = 'metric' | 'imperial';
+
 export function MeasurementSystemSelect() {
 	const dispatch = useDispatch();
-	const measurementSystem = useSelector(
+	const currentSystem = useSelector(
 		(state: RootState) =>
 			state.auth.user?.preferences?.measurementSystem || 'metric'
 	);
 
-	const handleMeasurementSystemChange = async (newSystem: string) => {
+	const handleMeasurementSystemChange = async (
+		newSystem: MeasurementSystem
+	) => {
 		try {
+			// Store the current value for potential rollback
+			const previousSystem = currentSystem;
+
+			// Optimistically update the UI
+			dispatch(updateUserPreferences({ measurementSystem: newSystem }));
+
 			const response = await fetch('/api/user/preferences', {
 				method: 'PUT',
 				headers: {
@@ -30,11 +40,12 @@ export function MeasurementSystemSelect() {
 				body: JSON.stringify({ measurementSystem: newSystem }),
 			});
 
-			if (response.ok) {
-				const data = await response.json();
-				dispatch(updateUserPreferences(data.preferences));
-			} else {
-				console.error('Failed to update measurement system');
+			const data = await response.json();
+
+			if (!response.ok) {
+				// Revert to previous value if the request failed
+				dispatch(updateUserPreferences({ measurementSystem: previousSystem }));
+				throw new Error(data.message || 'Failed to update measurement system');
 			}
 		} catch (error) {
 			console.error('Error updating measurement system:', error);
@@ -46,19 +57,22 @@ export function MeasurementSystemSelect() {
 			<DropdownMenuTrigger asChild>
 				<Button variant="default" className="flex items-center gap-2">
 					<Ruler className="h-4 w-4" />
-					<span>Measurement System</span>
+					<span>
+						Weight System:{' '}
+						{currentSystem.charAt(0).toUpperCase() + currentSystem.slice(1)}
+					</span>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				<DropdownMenuItem
 					onClick={() => handleMeasurementSystemChange('imperial')}
-					className="flex items-center"
+					className="flex items-center cursor-pointer"
 				>
 					Imperial
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => handleMeasurementSystemChange('metric')}
-					className="flex items-center"
+					className="flex items-center cursor-pointer"
 				>
 					Metric
 				</DropdownMenuItem>

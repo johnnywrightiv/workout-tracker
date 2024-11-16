@@ -4,10 +4,14 @@ import User from '@/models/user';
 import connectToDatabase from '@/lib/mongodb';
 import { z } from 'zod';
 
-const preferencesSchema = z.object({
-	colorScheme: z.enum(['light', 'dark', 'system']),
-	measurementSystem: z.enum(['metric', 'imperial']),
-});
+const preferencesSchema = z
+	.object({
+		colorScheme: z.enum(['blue', 'purple', 'orange', 'stone']).optional(),
+		measurementSystem: z.enum(['metric', 'imperial']).optional(),
+	})
+	.refine((data) => Object.keys(data).length > 0, {
+		message: 'At least one preference must be provided',
+	});
 
 export async function PUT(req: NextRequest) {
 	try {
@@ -20,14 +24,18 @@ export async function PUT(req: NextRequest) {
 		const body = await req.json();
 		const validatedData = preferencesSchema.parse(body);
 
+		const updateData: Record<string, any> = {};
+		if (validatedData.colorScheme) {
+			updateData['preferences.colorScheme'] = validatedData.colorScheme;
+		}
+		if (validatedData.measurementSystem) {
+			updateData['preferences.measurementSystem'] =
+				validatedData.measurementSystem;
+		}
+
 		const updatedUser = await User.findByIdAndUpdate(
 			user.userId,
-			{
-				$set: {
-					'preferences.colorScheme': validatedData.colorScheme,
-					'preferences.measurementSystem': validatedData.measurementSystem,
-				},
-			},
+			{ $set: updateData },
 			{ new: true, runValidators: true }
 		).select('preferences');
 

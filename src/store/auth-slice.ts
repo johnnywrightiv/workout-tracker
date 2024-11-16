@@ -1,18 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// Define the initial state for the authentication slice
+type ColorScheme = 'blue' | 'purple' | 'orange' | 'stone';
+type MeasurementSystem = 'metric' | 'imperial';
+
+interface UserPreferences {
+	colorScheme: ColorScheme;
+	measurementSystem: MeasurementSystem;
+}
+
 interface AuthState {
 	isAuthenticated: boolean;
 	user: {
 		userId: string;
 		email: string;
 		name: string;
-		preferences: {
-			colorScheme: string;
-			measurementSystem: string;
-		};
+		preferences: UserPreferences;
 	} | null;
 }
+
+const defaultPreferences: UserPreferences = {
+	colorScheme: 'blue',
+	measurementSystem: 'metric',
+};
 
 const initialState: AuthState = {
 	isAuthenticated: false,
@@ -25,35 +34,75 @@ const authSlice = createSlice({
 	reducers: {
 		login: (state, action: PayloadAction<AuthState['user']>) => {
 			state.isAuthenticated = true;
-			state.user = action.payload;
+			state.user = {
+				...action.payload,
+				preferences: {
+					...defaultPreferences,
+					...action.payload?.preferences,
+				},
+			};
 		},
 		logout: (state) => {
+			// Reset to default preferences before clearing user
+			if (state.user) {
+				localStorage.setItem('colorScheme', defaultPreferences.colorScheme);
+				document.documentElement.classList.remove(
+					'theme-blue',
+					'theme-purple',
+					'theme-orange',
+					'theme-stone'
+				);
+				document.documentElement.classList.add(
+					`theme-${defaultPreferences.colorScheme}`
+				);
+			}
 			state.isAuthenticated = false;
 			state.user = null;
 		},
 		updateUserPreferences: (
 			state,
-			action: PayloadAction<AuthState['user']['preferences']>
+			action: PayloadAction<Partial<UserPreferences>>
 		) => {
-			if (state.user) {
-				state.user.preferences = action.payload;
+			if (state.user && state.user.preferences) {
+				state.user.preferences = {
+					...state.user.preferences,
+					...action.payload,
+				};
 			}
 		},
-		// Optional: Action to set user details (e.g., after re-authentication)
-		setUserDetails: (
-			state,
-			action: PayloadAction<{ userId: string; email: string; name: string }>
-		) => {
-			state.user = action.payload;
+		setUserDetails: (state, action: PayloadAction<AuthState['user']>) => {
+			state.user = {
+				...action.payload,
+				preferences: {
+					...defaultPreferences,
+					...action.payload?.preferences,
+				},
+			};
 		},
-		setAuthenticated: (
-			state,
-			action: PayloadAction<{ userId: string; email: string; name: string }>
-		) => {
+		setAuthenticated: (state, action: PayloadAction<AuthState['user']>) => {
 			state.isAuthenticated = true;
-			state.user = action.payload;
+			state.user = {
+				...action.payload,
+				preferences: {
+					...defaultPreferences,
+					...action.payload?.preferences,
+				},
+			};
 		},
 		setUnauthenticated: (state) => {
+			// Reset to default preferences before clearing user
+			if (state.user) {
+				localStorage.setItem('colorScheme', defaultPreferences.colorScheme);
+				document.documentElement.classList.remove(
+					'theme-blue',
+					'theme-purple',
+					'theme-orange',
+					'theme-stone'
+				);
+				document.documentElement.classList.add(
+					`theme-${defaultPreferences.colorScheme}`
+				);
+			}
 			state.isAuthenticated = false;
 			state.user = null;
 		},
@@ -68,4 +117,5 @@ export const {
 	setAuthenticated,
 	setUnauthenticated,
 } = authSlice.actions;
+
 export default authSlice.reducer;
