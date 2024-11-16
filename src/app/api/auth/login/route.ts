@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
 import { z } from 'zod';
 
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 const loginSchema = z.object({

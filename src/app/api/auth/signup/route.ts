@@ -5,6 +5,9 @@ import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
 import { z } from 'zod';
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 const signupSchema = z.object({
 	email: z.string().email().toLowerCase().trim(),
 	password: z.string().min(8).max(100),
