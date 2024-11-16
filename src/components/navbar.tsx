@@ -72,7 +72,7 @@ export default function Navbar() {
 						{/* Main navbar items */}
 						<div className="flex items-center space-x-4 ml-auto">
 							{/* Desktop Nav Items */}
-							<div className="hidden md:flex md:items-center md:space-x-4">
+							<div className="hidden md:flex md:items-center md:space-x-2">
 								{navItems.map((item) => {
 									if (item.authRequired && !isAuthenticated) return null;
 									return (
@@ -89,6 +89,14 @@ export default function Navbar() {
 								})}
 								{isAuthenticated && <WorkoutButton />}
 							</div>
+
+							{/* Mobile Nav - Always show WorkoutButton */}
+							{/* The WorkoutButton should be visible on mobile */}
+							{isAuthenticated && (
+								<div className="md:hidden">
+									<WorkoutButton />
+								</div>
+							)}
 
 							{/* Authentication buttons (Desktop) */}
 							{!isAuthenticated && <AuthButtons />}

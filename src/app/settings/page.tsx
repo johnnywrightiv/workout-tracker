@@ -27,7 +27,6 @@ export default function SettingsPage() {
 							<ThemeSelect />
 						</div>
 						<ColorSchemeSelect />
-						<MeasurementSystemSelect />
 					</CardContent>
 				</Card>
 
@@ -39,6 +38,7 @@ export default function SettingsPage() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
+						<MeasurementSystemSelect />
 						<LogoutButton />
 					</CardContent>
 				</Card>

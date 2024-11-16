@@ -51,7 +51,7 @@ export default function RootLayout({
 									<Toaster />
 									<div>
 										<div className="hidden lg:block">{/* <Sidebar /> */}</div>
-										<main>{children}</main>
+										<main className="pb-16">{children}</main>
 									</div>
 									<footer>{/* <FooterContent /> */}</footer>
 									{/* <BottomBar /> */}

@@ -77,6 +77,7 @@ import {
 	MUSCLE_GROUPS,
 	WEIGHT_TYPES,
 } from '@/components/workout-form';
+import WorkoutButton from '@/components/new-workout-button';
 
 export default function Home() {
 	const convertWeight = (weight: number, to: 'kg' | 'lbs') => {
@@ -368,61 +369,69 @@ export default function Home() {
 
 	return (
 		<div className="container mx-auto py-8 px-4 space-y-8">
-			<div className="flex justify-between items-start gap-4 w-full">
-				<div className="flex justify-between gap-4 w-full">
-					<h1 className="text-3xl sm:text-4xl font-bold">Past Workouts</h1>
+			<div className="w-full space-y-4">
+				<div className="flex justify-between items-center gap-4 w-full flex-wrap">
+					<h1 className="text-3xl sm:text-4xl font-bold w-full sm:w-auto">
+						Past Workouts
+					</h1>
 
-					<div className="flex gap-2 w-1/2 sm:w-auto justify-end">
-						{isMobile ? (
-							<Drawer>
-								<DrawerTrigger asChild>
-									<Button variant="outline" className="sm:w-auto w-full">
-										<Filter className="mr-2 h-4 w-4" />
-										Filter
-									</Button>
-								</DrawerTrigger>
-								<DrawerContent>
-									<div className="pl-2 mx-auto w-full max-w-sm ">
+					{/* Filter and Sort Controls */}
+					<div className="w-full sm:w-auto flex flex-row gap-4 justify-end">
+						{/* Filter Button (Drawer for mobile, Sheet for desktop) */}
+						<div className="w-1/2 sm:w-auto">
+							{isMobile ? (
+								<Drawer>
+									<DrawerTrigger asChild>
+										<Button variant="outline" className="w-full">
+											<Filter className="mr-2 h-4 w-4" />
+											Filter
+										</Button>
+									</DrawerTrigger>
+									<DrawerContent>
+										<div className="pl-2 mx-auto w-full max-w-sm">
+											<FilterContent />
+										</div>
+									</DrawerContent>
+								</Drawer>
+							) : (
+								<Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+									<SheetTrigger asChild>
+										<Button variant="outline" className="w-full">
+											<Filter className="mr-2 h-4 w-4" />
+											Filter
+										</Button>
+									</SheetTrigger>
+									<SheetContent className="animate-slide-in-from-right">
 										<FilterContent />
-									</div>
-								</DrawerContent>
-							</Drawer>
-						) : (
-							<Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-								<SheetTrigger asChild>
-									<Button variant="outline" className="sm:w-auto w-full">
-										<Filter className="mr-2 h-4 w-4" />
-										Filter
-									</Button>
-								</SheetTrigger>
-								<SheetContent className=" animate-slide-in-from-right">
-									<FilterContent />
-								</SheetContent>
-							</Sheet>
-						)}
+									</SheetContent>
+								</Sheet>
+							)}
+						</div>
 
 						{/* Sort Dropdown */}
-						<Select
-							value={sortOrder}
-							onValueChange={(value: 'newest' | 'oldest') =>
-								setSortOrder(value)
-							}
-						>
-							<SelectTrigger className="sm:w-[140px] w-full">
-								<div className="flex items-center">
-									{sortOrder === 'newest' ? (
-										<SortDesc className="mr-2 h-4 w-4" />
-									) : (
-										<SortAsc className="mr-2 h-4 w-4" />
-									)}
-									<SelectValue placeholder="Sort by" />
-								</div>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="newest">Newest</SelectItem>
-								<SelectItem value="oldest">Oldest</SelectItem>
-							</SelectContent>
-						</Select>
+						<div className="w-1/2 sm:w-auto">
+							<Select
+								value={sortOrder}
+								onValueChange={(value: 'newest' | 'oldest') =>
+									setSortOrder(value)
+								}
+							>
+								<SelectTrigger className="w-full justify-center">
+									<div className="flex items-center">
+										{sortOrder === 'newest' ? (
+											<SortDesc className="mr-2 h-4 w-4" />
+										) : (
+											<SortAsc className="mr-2 h-4 w-4" />
+										)}
+										<SelectValue placeholder="Sort by" />
+									</div>
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="newest">Newest</SelectItem>
+									<SelectItem value="oldest">Oldest</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 				</div>
 			</div>
