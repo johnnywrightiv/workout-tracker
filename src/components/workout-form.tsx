@@ -29,6 +29,16 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export const MUSCLE_GROUPS = [
 	'Chest',
@@ -183,6 +193,7 @@ export default function WorkoutForm({
 	const [workoutStatus, setWorkoutStatus] = useState<
 		'not_started' | 'in_progress' | 'completed'
 	>('not_started');
+	const [showReminder, setShowReminder] = useState(false);
 	const router = useRouter();
 	const { toast } = useToast();
 
@@ -315,50 +326,27 @@ export default function WorkoutForm({
 			return;
 		}
 
-		if (!isTemplate) {
-			if (!formData.startTime) {
-				toast({
-					variant: 'destructive',
-					title: 'Validation Error',
-					description: 'Please start the workout first.',
-				});
-				setIsLoading(false);
-				return;
-			}
-
-			if (!formData.endTime) {
-				toast({
-					variant: 'destructive',
-					title: 'Validation Error',
-					description: 'Please end the workout before saving.',
-				});
-				setIsLoading(false);
-				return;
-			}
-		}
-
-		if (formData.exercises.length === 0) {
+		if (!isTemplate && !formData.startTime) {
 			toast({
 				variant: 'destructive',
 				title: 'Validation Error',
-				description: 'Please add at least one exercise.',
+				description: 'Please start the workout first.',
 			});
 			setIsLoading(false);
 			return;
 		}
 
-		for (const exercise of formData.exercises) {
-			if (!exercise.name.trim() || !exercise.exerciseType) {
-				toast({
-					variant: 'destructive',
-					title: 'Validation Error',
-					description:
-						'Please fill in all required exercise fields (name, type).',
-				});
-				setIsLoading(false);
-				return;
-			}
+		if (!isTemplate && !formData.endTime) {
+			setShowReminder(true);
+			setIsLoading(false);
+			return;
 		}
+
+		await submitForm();
+	};
+
+	const submitForm = async () => {
+		setIsLoading(true);
 
 		try {
 			const submissionData = {
@@ -904,6 +892,26 @@ export default function WorkoutForm({
 					)}
 				</Button>
 			</form>
+			<AlertDialog open={showReminder} onOpenChange={setShowReminder}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Workout Not Ended</AlertDialogTitle>
+						<AlertDialogDescription>
+							Your workout has not been ended yet. You can save it now, but
+							remember to come back and end your workout to track your progress
+							accurately.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={() => setIsLoading(false)}>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction onClick={submitForm}>
+							Save Anyway
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }
