@@ -78,7 +78,7 @@ export default function WorkoutButton() {
 				<div className="px-2 py-1.5 text-sm font-semibold">Templates</div>
 				{loading ? (
 					<div className="flex items-center justify-center py-2">
-						<Loader2 className="h-4 w-4 animate-spin" />
+						<div className="flex items-center justify-center h-16 w-16 animate-spin rounded-full border-4 border-t-4 border-solid border-primary border-t-accent" />
 					</div>
 				) : templates.length > 0 ? (
 					templates.map((template) => (

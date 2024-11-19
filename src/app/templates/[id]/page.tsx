@@ -44,7 +44,7 @@ export default function EditTemplate() {
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
-				<Loader2 className="h-8 w-8 animate-spin" />
+				<div className="flex items-center justify-center h-16 w-16 animate-spin rounded-full border-4 border-t-4 border-solid border-primary border-t-accent" />
 			</div>
 		);
 	}
