@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const token = jwt.sign({ userId: existingUser._id }, jwtSecret, {
-			expiresIn: '1h',
+			expiresIn: '7d',
 		});
 
 		// Merge default preferences with user preferences

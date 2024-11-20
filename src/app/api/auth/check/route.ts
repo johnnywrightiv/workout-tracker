@@ -3,9 +3,6 @@ import { verifyAuth } from '@/middleware/verify-auth';
 import User from '@/models/user';
 import connectToDatabase from '@/lib/mongodb';
 
-export const maxDuration = 60;
-export const dynamic = 'force-dynamic';
-
 export async function GET(req: NextRequest) {
 	try {
 		await connectToDatabase();
