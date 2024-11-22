@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import WorkoutForm from '@/components/workout-form';
 import axios from 'axios';
-import { Loader2 } from 'lucide-react';
 
 export default function CreateWorkout() {
 	const searchParams = useSearchParams();

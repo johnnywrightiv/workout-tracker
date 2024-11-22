@@ -26,7 +26,7 @@ export function ColorSchemeProvider({
 			document.documentElement.classList.add(`theme-${colorScheme}`);
 		}
 		setIsLoading(false);
-	}, []);
+	});
 
 	// Theme update effect
 	useEffect(() => {

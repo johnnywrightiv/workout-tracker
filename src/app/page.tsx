@@ -77,7 +77,6 @@ import {
 	MUSCLE_GROUPS,
 	WEIGHT_TYPES,
 } from '@/components/workout-form';
-import WorkoutButton from '@/components/new-workout-button';
 
 export default function Home() {
 	const convertWeight = (weight: number, to: 'kg' | 'lbs') => {

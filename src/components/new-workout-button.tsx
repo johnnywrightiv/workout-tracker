@@ -10,7 +10,7 @@ import {
 	DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Dumbbell, File, Loader2 } from 'lucide-react';
+import { PlusCircle, Dumbbell, File } from 'lucide-react';
 import axios from 'axios';
 
 interface Template {

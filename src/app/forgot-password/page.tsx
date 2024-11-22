@@ -58,8 +58,6 @@ export default function ForgotPassword() {
 				body: JSON.stringify({ email }),
 			});
 
-			const data = await response.json();
-
 			if (response.ok) {
 				toast({
 					title: 'Email Sent',
