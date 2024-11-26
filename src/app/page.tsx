@@ -72,11 +72,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 
-import {
-	EXERCISE_TYPES,
-	MUSCLE_GROUPS,
-	WEIGHT_TYPES,
-} from '@/components/workout-form';
+import { EXERCISE_TYPES, MUSCLE_GROUPS, WEIGHT_TYPES } from '@/lib/constants';
 
 export default function Home() {
 	const convertWeight = (weight: number, to: 'kg' | 'lbs') => {

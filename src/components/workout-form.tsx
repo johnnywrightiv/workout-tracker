@@ -3,30 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-	Loader2,
-	DumbbellIcon,
-	InfoIcon,
-	ClockIcon,
-	BikeIcon,
-} from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, DumbbellIcon, InfoIcon, BikeIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import {
@@ -39,57 +23,9 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-export const MUSCLE_GROUPS = [
-	'Chest',
-	'Back',
-	'Shoulders',
-	'Biceps',
-	'Triceps',
-	'Core/Abs',
-	'Glutes',
-	'Quads',
-	'Hamstrings',
-	'Calves',
-	'Misc',
-] as const;
-
-export const WEIGHT_TYPES = [
-	'Dumbbell',
-	'Barbell',
-	'Kettlebell',
-	'Cable',
-	'Machine',
-	'Band',
-	'Bodyweight',
-	'Misc',
-] as const;
-
-export const EXERCISE_TYPES = ['Strength', 'Cardio'] as const;
-
-interface Exercise {
-	name: string;
-	sets: number;
-	reps: number;
-	weight: number;
-	notes: string;
-	muscleGroup: string;
-	weightType: string;
-	equipmentSettings: string;
-	duration: number;
-	exerciseType: string;
-	speed: number;
-	distance: number;
-}
-
-interface FormData {
-	name: string;
-	startTime: string;
-	endTime: string;
-	duration: number;
-	notes: string;
-	exercises: Exercise[];
-}
+import { ExerciseForm } from './exercise-form';
+import { WorkoutDetails } from './workout-details';
+import { Exercise, FormData } from '@/types/workout';
 
 interface WorkoutFormProps {
 	initialData?: FormData;
@@ -97,62 +33,6 @@ interface WorkoutFormProps {
 	id?: string;
 	onSubmit: (data: FormData) => Promise<void>;
 }
-
-const IncrementDecrementButton = ({
-	value,
-	onChange,
-	min = 0,
-	step = 1,
-	allowDecimals = false,
-}: {
-	value: number;
-	onChange: (value: number) => void;
-	min?: number;
-	step?: number;
-	allowDecimals?: boolean;
-}) => (
-	<div className="flex items-center justify-center w-full gap-2">
-		<Button
-			type="button"
-			variant="outline"
-			onClick={() => {
-				const newValue = Number(Math.max(min, value - step).toFixed(2));
-				onChange(newValue);
-			}}
-			disabled={value <= min}
-			className="h-8 w-8"
-		>
-			-
-		</Button>
-		<Input
-			type="number"
-			value={value}
-			onChange={(e) => {
-				const newValue =
-					e.target.value === ''
-						? min
-						: Math.max(min, parseFloat(e.target.value));
-				onChange(
-					allowDecimals ? Number(newValue.toFixed(2)) : Math.floor(newValue)
-				);
-			}}
-			className="flex w-20 h-8 text-center mx-1"
-			min={min}
-			step={allowDecimals ? '0.01' : '1'}
-		/>
-		<Button
-			type="button"
-			variant="outline"
-			onClick={() => {
-				const newValue = Number((value + step).toFixed(2));
-				onChange(newValue);
-			}}
-			className="h-8 w-8"
-		>
-			+
-		</Button>
-	</div>
-);
 
 export default function WorkoutForm({
 	initialData,
@@ -181,12 +61,13 @@ export default function WorkoutForm({
 					exerciseType: '',
 					speed: 0,
 					distance: 0,
+					completed: false,
 				},
 			],
 		}
 	);
 	const [isLoading, setIsLoading] = useState(false);
-	const [expandedExercises, setExpandedExercises] = useState<string[]>(['']);
+	const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
 	const [expandedSections, setExpandedSections] = useState<string[]>([
 		'details',
 	]);
@@ -196,6 +77,11 @@ export default function WorkoutForm({
 	const [showReminder, setShowReminder] = useState(false);
 	const router = useRouter();
 	const { toast } = useToast();
+
+	const measurementSystem = useSelector(
+		(state: RootState) =>
+			state.auth.user?.preferences?.measurementSystem || 'imperial'
+	);
 
 	useEffect(() => {
 		if (initialData) {
@@ -221,36 +107,9 @@ export default function WorkoutForm({
 		}
 	}, [formData.startTime, formData.endTime]);
 
-	const measurementSystem = useSelector(
-		(state: RootState) =>
-			state.auth.user?.preferences?.measurementSystem || 'imperial'
-	);
-
-	const convertWeight = (weight: number, to: 'kg' | 'lbs') => {
-		return to === 'kg' ? weight * 0.45359237 : weight / 0.45359237;
-	};
-
-	const convertDistance = (distance: number, to: 'km' | 'miles') => {
-		return to === 'km' ? distance * 1.60934 : distance / 1.60934;
-	};
-
-	const handleExerciseChange = (
-		index: number,
-		field: keyof Exercise,
-		value: string | number
-	) => {
+	const handleExerciseChange = (index: number, updatedExercise: Exercise) => {
 		const updatedExercises = [...formData.exercises];
-		if (field === 'weight' && typeof value === 'number') {
-			value =
-				measurementSystem === 'metric' ? convertWeight(value, 'lbs') : value;
-		}
-		if (field === 'distance' && typeof value === 'number') {
-			value =
-				measurementSystem === 'metric'
-					? convertDistance(value, 'miles')
-					: value;
-		}
-		updatedExercises[index] = { ...updatedExercises[index], [field]: value };
+		updatedExercises[index] = updatedExercise;
 		setFormData({ ...formData, exercises: updatedExercises });
 	};
 
@@ -273,10 +132,11 @@ export default function WorkoutForm({
 					exerciseType: '',
 					speed: 0,
 					distance: 0,
+					completed: false,
 				},
 			],
 		});
-		setExpandedExercises([...expandedExercises, newIndex.toString()]);
+		setExpandedExercise(newIndex.toString());
 	};
 
 	const handleRemoveExercise = (index: number) => {
@@ -284,9 +144,7 @@ export default function WorkoutForm({
 			...formData,
 			exercises: formData.exercises.filter((_, i) => i !== index),
 		});
-		setExpandedExercises(
-			expandedExercises.filter((i) => i !== index.toString())
-		);
+		setExpandedExercise(null);
 	};
 
 	const handleStartWorkout = () => {
@@ -305,17 +163,10 @@ export default function WorkoutForm({
 		setWorkoutStatus('completed');
 	};
 
-	const formatTime = (isoString: string) => {
-		if (!isoString) return null;
-		const date = new Date(isoString);
-		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-	};
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 
-		// Validate form
 		if (!formData.name.trim()) {
 			toast({
 				variant: 'destructive',
@@ -407,90 +258,14 @@ export default function WorkoutForm({
 							</div>
 						</AccordionTrigger>
 						<AccordionContent className="pt-4">
-							<Card>
-								<CardContent className="pt-6">
-									<div className="grid gap-4">
-										<div className="space-y-2">
-											<label htmlFor="name" className="text-sm font-medium">
-												Workout Name
-											</label>
-											<div className="flex items-center space-x-4">
-												<Input
-													id="name"
-													placeholder="e.g. Leg Day"
-													value={formData.name}
-													onChange={(e) =>
-														setFormData({ ...formData, name: e.target.value })
-													}
-													className="flex-1"
-												/>
-												{!isTemplate && (
-													<div className="flex flex-col items-start space-y-2">
-														{workoutStatus === 'not_started' && (
-															<Button
-																type="button"
-																onClick={handleStartWorkout}
-																size="sm"
-																variant="default"
-															>
-																Start Workout
-															</Button>
-														)}
-														{workoutStatus === 'in_progress' && (
-															<div className="flex flex-col space-y-2">
-																<Button
-																	type="button"
-																	onClick={handleEndWorkout}
-																	size="sm"
-																>
-																	End Workout
-																</Button>
-															</div>
-														)}
-													</div>
-												)}
-											</div>
-										</div>
-
-										{workoutStatus === 'in_progress' && (
-											<div className="text-sm flex items-center justify-end space-x-1">
-												<ClockIcon className="h-4 w-4 text-muted-foreground" />
-												<span>Started: {formatTime(formData.startTime)}</span>
-											</div>
-										)}
-										{workoutStatus === 'completed' && (
-											<div className="sm:text-sm text-xs flex items-center justify-evenly">
-												<div className="flex items-center space-x-1">
-													<span>
-														Start: {formatTime(formData.startTime)} -{' '}
-													</span>
-													<span>End: {formatTime(formData.endTime)}</span>
-												</div>
-												<div className="flex items-center space-x-1 sm:space-x-2">
-													<ClockIcon className="h-4 w-4 text-muted-foreground" />
-													<span>{formData.duration} minutes</span>
-												</div>
-											</div>
-										)}
-
-										{/* Notes Section */}
-										<div className="space-y-2">
-											<label htmlFor="notes" className="text-sm font-medium">
-												Notes
-											</label>
-											<Textarea
-												id="notes"
-												placeholder="Any additional notes about the workout"
-												value={formData.notes}
-												onChange={(e) =>
-													setFormData({ ...formData, notes: e.target.value })
-												}
-												className="min-h-[80px]"
-											/>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
+							<WorkoutDetails
+								formData={formData}
+								setFormData={setFormData}
+								workoutStatus={workoutStatus}
+								isTemplate={isTemplate}
+								handleStartWorkout={handleStartWorkout}
+								handleEndWorkout={handleEndWorkout}
+							/>
 						</AccordionContent>
 					</AccordionItem>
 				</Accordion>
@@ -503,9 +278,10 @@ export default function WorkoutForm({
 						</Button>
 					</div>
 					<Accordion
-						type="multiple"
-						value={expandedExercises}
-						onValueChange={setExpandedExercises}
+						type="single"
+						value={expandedExercise}
+						onValueChange={(value) => setExpandedExercise(value)}
+						collapsible
 						className="space-y-4"
 					>
 						{formData.exercises.map((exercise, index) => (
@@ -522,7 +298,6 @@ export default function WorkoutForm({
 											{exercise.name || 'New Exercise'}
 										</span>
 
-										{/* Display strength-specific details */}
 										{exercise.exerciseType === 'Strength' &&
 											exercise.sets > 0 && (
 												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
@@ -537,7 +312,6 @@ export default function WorkoutForm({
 												</span>
 											)}
 
-										{/* Display cardio-specific details */}
 										{exercise.exerciseType === 'Cardio' &&
 											exercise.duration > 0 && (
 												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
@@ -554,7 +328,6 @@ export default function WorkoutForm({
 												</span>
 											)}
 
-										{/* Display notes, force them to the next row */}
 										{exercise.notes && (
 											<span className="text-sm text-start text-muted-foreground w-full ml-8 -mt-2">
 												{exercise.notes}
@@ -563,318 +336,15 @@ export default function WorkoutForm({
 									</div>
 								</AccordionTrigger>
 								<AccordionContent className="pt-4">
-									<Card>
-										<CardContent className="pt-6">
-											<div className="grid gap-4">
-												<div className="grid sm:grid-cols-2 gap-4">
-													<div className="space-y-2">
-														<label
-															htmlFor={`name-${index}`}
-															className="text-sm font-medium"
-														>
-															Exercise Name
-														</label>
-														<Input
-															id={`name-${index}`}
-															placeholder="e.g. Bench Press"
-															value={exercise.name}
-															onChange={(e) =>
-																handleExerciseChange(
-																	index,
-																	'name',
-																	e.target.value
-																)
-															}
-														/>
-													</div>
-													<div className="space-y-2">
-														<label
-															htmlFor={`exerciseType-${index}`}
-															className="text-sm font-medium"
-														>
-															Exercise Type
-														</label>
-														<Select
-															value={exercise.exerciseType}
-															onValueChange={(value) =>
-																handleExerciseChange(
-																	index,
-																	'exerciseType',
-																	value
-																)
-															}
-														>
-															<SelectTrigger>
-																<SelectValue
-																	placeholder={
-																		<span className="text-muted-foreground">
-																			Select exercise type
-																		</span>
-																	}
-																/>
-															</SelectTrigger>
-															<SelectContent>
-																{EXERCISE_TYPES.map((type) => (
-																	<SelectItem key={type} value={type}>
-																		{type}
-																	</SelectItem>
-																))}
-															</SelectContent>
-														</Select>
-													</div>
-												</div>
-												{exercise.exerciseType === 'Strength' && (
-													<>
-														<div className="grid sm:grid-cols-2 gap-4">
-															<div className="space-y-2">
-																<label
-																	htmlFor={`muscleGroup-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Muscle Group
-																</label>
-																<Select
-																	value={exercise.muscleGroup}
-																	onValueChange={(value) =>
-																		handleExerciseChange(
-																			index,
-																			'muscleGroup',
-																			value
-																		)
-																	}
-																>
-																	<SelectTrigger>
-																		<SelectValue
-																			placeholder={
-																				<span className="text-muted-foreground">
-																					Select muscle group
-																				</span>
-																			}
-																		/>
-																	</SelectTrigger>
-																	<SelectContent>
-																		{MUSCLE_GROUPS.map((group) => (
-																			<SelectItem key={group} value={group}>
-																				{group}
-																			</SelectItem>
-																		))}
-																	</SelectContent>
-																</Select>
-															</div>
-															<div className="space-y-2">
-																<label
-																	htmlFor={`weightType-${index}`}
-																	className="text-sm font-medium"
-																>
-																	Weight Type
-																</label>
-																<Select
-																	value={exercise.weightType}
-																	onValueChange={(value) =>
-																		handleExerciseChange(
-																			index,
-																			'weightType',
-																			value
-																		)
-																	}
-																>
-																	<SelectTrigger>
-																		<SelectValue
-																			placeholder={
-																				<span className="text-muted-foreground">
-																					Select weight type
-																				</span>
-																			}
-																		/>
-																	</SelectTrigger>
-																	<SelectContent>
-																		{WEIGHT_TYPES.map((type) => (
-																			<SelectItem key={type} value={type}>
-																				{type}
-																			</SelectItem>
-																		))}
-																	</SelectContent>
-																</Select>
-															</div>
-														</div>
-														<div className="space-y-2">
-															<label
-																htmlFor={`equipmentSettings-${index}`}
-																className="text-sm font-medium"
-															>
-																Equipment Settings
-															</label>
-															<Input
-																id={`equipmentSettings-${index}`}
-																placeholder="e.g. seat height #5"
-																value={exercise.equipmentSettings}
-																onChange={(e) =>
-																	handleExerciseChange(
-																		index,
-																		'equipmentSettings',
-																		e.target.value
-																	)
-																}
-															/>
-														</div>
-													</>
-												)}
-
-												{/* Cardio or Strength Input Values */}
-												{exercise.exerciseType === 'Cardio' ? (
-													<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
-														<div className="space-y-2 min-w-0">
-															<label
-																htmlFor={`duration-${index}`}
-																className="text-sm font-medium truncate"
-															>
-																Duration (mins)
-															</label>
-															<IncrementDecrementButton
-																value={exercise.duration}
-																onChange={(value) =>
-																	handleExerciseChange(index, 'duration', value)
-																}
-															/>
-														</div>
-														<div className="space-y-2 min-w-0">
-															<label
-																htmlFor={`speed-${index}`}
-																className="text-sm font-medium truncate"
-															>
-																Speed (
-																{measurementSystem === 'metric'
-																	? 'km/h'
-																	: 'mph'}
-																)
-															</label>
-															<IncrementDecrementButton
-																value={exercise.speed}
-																onChange={(value) =>
-																	handleExerciseChange(index, 'speed', value)
-																}
-																step={0.1}
-																allowDecimals={true}
-															/>
-														</div>
-														<div className="space-y-2 min-w-0">
-															<label
-																htmlFor={`distance-${index}`}
-																className="text-sm font-medium truncate"
-															>
-																Distance (
-																{measurementSystem === 'metric'
-																	? 'km'
-																	: 'miles'}
-																)
-															</label>
-															<IncrementDecrementButton
-																value={
-																	measurementSystem === 'metric'
-																		? convertDistance(exercise.distance, 'km')
-																		: exercise.distance
-																}
-																onChange={(value) =>
-																	handleExerciseChange(index, 'distance', value)
-																}
-																step={0.1}
-																allowDecimals={true}
-															/>
-														</div>
-													</div>
-												) : exercise.exerciseType === 'Strength' ? (
-													<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
-														<div className="space-y-2 min-w-0">
-															<div className="text-center space-y-2">
-																<label
-																	htmlFor={`sets-${index}`}
-																	className="text-sm font-medium truncate text-clip"
-																>
-																	Sets
-																</label>
-																<IncrementDecrementButton
-																	value={exercise.sets}
-																	onChange={(value) =>
-																		handleExerciseChange(index, 'sets', value)
-																	}
-																/>
-															</div>
-														</div>
-														<div className="text-center space-y-2 min-w-0">
-															<label
-																htmlFor={`reps-${index}`}
-																className="text-sm font-medium truncate"
-															>
-																Reps
-															</label>
-															<IncrementDecrementButton
-																value={exercise.reps}
-																onChange={(value) =>
-																	handleExerciseChange(index, 'reps', value)
-																}
-															/>
-														</div>
-														<div className="text-center space-y-2 min-w-0">
-															<label
-																htmlFor={`weight-${index}`}
-																className="text-sm font-medium truncate"
-															>
-																Weight (
-																{measurementSystem === 'metric' ? 'kg' : 'lbs'})
-															</label>
-															<IncrementDecrementButton
-																value={
-																	measurementSystem === 'metric'
-																		? convertWeight(exercise.weight, 'kg')
-																		: exercise.weight
-																}
-																onChange={(value) =>
-																	handleExerciseChange(index, 'weight', value)
-																}
-																step={measurementSystem === 'metric' ? 2.5 : 5}
-																allowDecimals={true}
-															/>
-														</div>
-													</div>
-												) : (
-													<div></div>
-												)}
-
-												<div className="space-y-2">
-													<label
-														htmlFor={`notes-${index}`}
-														className="text-sm font-medium"
-													>
-														Notes
-													</label>
-													<Textarea
-														id={`notes-${index}`}
-														value={exercise.notes}
-														onChange={(e) =>
-															handleExerciseChange(
-																index,
-																'notes',
-																e.target.value
-															)
-														}
-														placeholder="Any specific instructions or notes"
-														className="min-h-[60px]"
-													/>
-												</div>
-												<div className="flex justify-end">
-													<Button
-														type="button"
-														variant="destructive"
-														size="sm"
-														onClick={() => handleRemoveExercise(index)}
-														disabled={formData.exercises.length === 1}
-													>
-														Remove Exercise
-													</Button>
-												</div>
-											</div>
-										</CardContent>
-									</Card>
+									<ExerciseForm
+										exercise={exercise}
+										onChange={(updatedExercise) =>
+											handleExerciseChange(index, updatedExercise)
+										}
+										onRemove={() => handleRemoveExercise(index)}
+										measurementSystem={measurementSystem}
+										isLastExercise={index === formData.exercises.length - 1}
+									/>
 								</AccordionContent>
 							</AccordionItem>
 						))}
