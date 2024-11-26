@@ -10,8 +10,7 @@ interface WorkoutDetailsProps {
 	setFormData: React.Dispatch<React.SetStateAction<FormData>>;
 	workoutStatus: 'not_started' | 'in_progress' | 'completed';
 	isTemplate: boolean;
-	handleStartWorkout: () => void;
-	handleEndWorkout: () => void;
+	renderControlButton?: (className?: string) => React.ReactNode;
 }
 
 export function WorkoutDetails({
@@ -19,8 +18,7 @@ export function WorkoutDetails({
 	setFormData,
 	workoutStatus,
 	isTemplate,
-	handleStartWorkout,
-	handleEndWorkout,
+	renderControlButton,
 }: WorkoutDetailsProps) {
 	const formatTime = (isoString: string) => {
 		if (!isoString) return null;
@@ -46,31 +44,7 @@ export function WorkoutDetails({
 								}
 								className="flex-1"
 							/>
-							{!isTemplate && (
-								<div className="flex flex-col items-start space-y-2">
-									{workoutStatus === 'not_started' && (
-										<Button
-											type="button"
-											onClick={handleStartWorkout}
-											size="sm"
-											variant="default"
-										>
-											Start Workout
-										</Button>
-									)}
-									{workoutStatus === 'in_progress' && (
-										<div className="flex flex-col space-y-2">
-											<Button
-												type="button"
-												onClick={handleEndWorkout}
-												size="sm"
-											>
-												End Workout
-											</Button>
-										</div>
-									)}
-								</div>
-							)}
+							{!isTemplate && renderControlButton && renderControlButton()}
 						</div>
 					</div>
 

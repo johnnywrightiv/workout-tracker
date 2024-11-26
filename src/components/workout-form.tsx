@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ExerciseForm } from './exercise-form';
 import { WorkoutDetails } from './workout-details';
+import { WorkoutControlButton } from './workout-control-button';
 import { Exercise, FormData } from '@/types/workout';
 
 interface WorkoutFormProps {
@@ -246,25 +247,41 @@ export default function WorkoutForm({
 					className="space-y-4"
 				>
 					<AccordionItem value="details">
-						<AccordionTrigger className="hover:no-underline">
-							<div className="flex items-center gap-3 w-full">
-								<InfoIcon className="h-5 w-5 text-muted-foreground" />
-								<span className="font-medium">Details</span>
-								{formData.name && (
-									<span className="text-sm text-muted-foreground ml-2">
-										{formData.name}
-									</span>
-								)}
-							</div>
-						</AccordionTrigger>
+						<div className="flex justify-between items-center">
+							<AccordionTrigger className="hover:no-underline">
+								<div className="flex items-center gap-3 w-full">
+									<InfoIcon className="h-5 w-5 text-muted-foreground" />
+									<span className="font-medium">Details</span>
+									{formData.name && (
+										<span className="text-sm text-muted-foreground ml-2">
+											{formData.name} | {formData.duration} mins.
+										</span>
+									)}
+								</div>
+							</AccordionTrigger>
+							{!isTemplate && !expandedSections.includes('details') && (
+								<WorkoutControlButton
+									workoutStatus={workoutStatus}
+									onStart={handleStartWorkout}
+									onEnd={handleEndWorkout}
+									className="ml-auto"
+								/>
+							)}
+						</div>
 						<AccordionContent className="pt-4">
 							<WorkoutDetails
 								formData={formData}
 								setFormData={setFormData}
 								workoutStatus={workoutStatus}
 								isTemplate={isTemplate}
-								handleStartWorkout={handleStartWorkout}
-								handleEndWorkout={handleEndWorkout}
+								renderControlButton={(className) => (
+									<WorkoutControlButton
+										workoutStatus={workoutStatus}
+										onStart={handleStartWorkout}
+										onEnd={handleEndWorkout}
+										className={className}
+									/>
+								)}
 							/>
 						</AccordionContent>
 					</AccordionItem>
@@ -322,9 +339,8 @@ export default function WorkoutForm({
 													{measurementSystem === 'metric' ? 'km' : 'miles'} |
 													Speed:{' '}
 													{measurementSystem === 'metric'
-														? (exercise.speed * 1.60934).toFixed(1)
-														: exercise.speed}{' '}
-													{measurementSystem === 'metric' ? 'km/h' : 'mph'}
+														? `${((exercise.distance / exercise.duration) * 1.60934).toFixed(1)} km/h`
+														: `${(exercise.distance / exercise.duration).toFixed(1)} mph`}{' '}
 												</span>
 											)}
 

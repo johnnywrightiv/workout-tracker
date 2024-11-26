@@ -16,7 +16,7 @@ import {
 	Home,
 	LogIn,
 	UserPlus,
-	Pin,
+	FileClock,
 	Settings,
 	Menu,
 	LineChart,
@@ -37,15 +37,15 @@ export default function Navbar() {
 	const navItems = [
 		{ href: '/', label: 'Home', icon: Home },
 		{
-			href: '/progress',
-			label: 'Progress',
-			icon: LineChart,
+			href: '/templates',
+			label: 'Templates',
+			icon: FileClock,
 			authRequired: true,
 		},
 		{
-			href: '/templates',
-			label: 'Templates',
-			icon: Pin,
+			href: '/progress',
+			label: 'Progress',
+			icon: LineChart,
 			authRequired: true,
 		},
 		{

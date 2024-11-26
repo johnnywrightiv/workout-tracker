@@ -561,8 +561,8 @@ export default function Home() {
 																			: `${exercise.distance} miles`}{' '}
 																		| Speed:{' '}
 																		{measurementSystem === 'metric'
-																			? `${convertDistance(exercise.speed, 'km').toFixed(1)} km/h`
-																			: `${exercise.speed} mph`}
+																			? `${((exercise.distance / exercise.duration) * 1.60934).toFixed(1)} km/h`
+																			: `${(exercise.distance / exercise.duration).toFixed(1)} mph`}
 																	</span>
 																)}
 															</div>
