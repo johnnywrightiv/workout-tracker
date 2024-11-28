@@ -1,6 +1,13 @@
 'use client';
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import {
+	Bar,
+	BarChart,
+	ResponsiveContainer,
+	XAxis,
+	YAxis,
+	CartesianGrid,
+} from 'recharts';
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -8,28 +15,7 @@ import {
 } from '@/components/ui/chart';
 
 interface Workout {
-	_id: string;
-	user_id: string;
-	name: string;
 	date: string;
-	startTime: string;
-	endTime?: string;
-	duration: number;
-	notes: string;
-	exercises: Array<{
-		name: string;
-		sets: number;
-		reps: number;
-		weight: number;
-		notes: string;
-		muscleGroup: string;
-		weightType: string;
-		equipmentSettings: string;
-		duration: number;
-		exerciseType: string;
-		speed: number;
-		distance: number;
-	}>;
 }
 
 export default function WorkoutFrequency({
@@ -62,16 +48,29 @@ export default function WorkoutFrequency({
 		<ChartContainer
 			config={{
 				total: {
-					label: 'Workouts',
+					label: 'Workouts per Day',
 					color: 'hsl(var(--primary))',
 				},
 			}}
-			className="h-[300px]"
+			className="h-[300px] w-full"
 		>
 			<ResponsiveContainer width="100%" height="100%">
-				<BarChart data={data}>
-					<XAxis dataKey="name" />
-					<YAxis />
+				<BarChart
+					data={data}
+					margin={{
+						top: 10,
+						right: 10,
+						left: 0,
+						bottom: 0,
+					}}
+				>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						horizontal={true}
+						vertical={false}
+					/>
+					<XAxis dataKey="name" axisLine={false} tickLine={false} />
+					<YAxis axisLine={false} tickLine={false} />
 					<ChartTooltip content={<ChartTooltipContent />} />
 					<Bar
 						dataKey="total"

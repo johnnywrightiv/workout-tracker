@@ -1,6 +1,13 @@
 'use client';
 
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import {
+	Line,
+	LineChart,
+	ResponsiveContainer,
+	XAxis,
+	YAxis,
+	CartesianGrid,
+} from 'recharts';
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -28,18 +35,32 @@ export default function WorkoutDuration({ workouts }: { workouts: Workout[] }) {
 					color: 'hsl(var(--primary))',
 				},
 			}}
-			className="h-[300px]"
+			className="h-[300px] w-full"
 		>
 			<ResponsiveContainer width="100%" height="100%">
-				<LineChart data={data}>
-					<XAxis dataKey="date" />
-					<YAxis />
+				<LineChart
+					data={data}
+					margin={{
+						top: 10,
+						right: 10,
+						left: 0,
+						bottom: 0,
+					}}
+				>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						horizontal={true}
+						vertical={false}
+					/>
+					<XAxis dataKey="date" axisLine={false} tickLine={false} />
+					<YAxis axisLine={false} tickLine={false} />
 					<ChartTooltip content={<ChartTooltipContent />} />
 					<Line
 						type="monotone"
 						dataKey="duration"
 						stroke="var(--color-duration)"
 						strokeWidth={2}
+						dot={{ r: 4 }}
 					/>
 				</LineChart>
 			</ResponsiveContainer>

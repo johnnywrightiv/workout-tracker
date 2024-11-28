@@ -8,27 +8,8 @@ import {
 } from '@/components/ui/chart';
 
 interface Workout {
-	_id: string;
-	user_id: string;
-	name: string;
-	date: string;
-	startTime: string;
-	endTime?: string;
-	duration: number;
-	notes: string;
 	exercises: Array<{
-		name: string;
-		sets: number;
-		reps: number;
-		weight: number;
-		notes: string;
 		muscleGroup: string;
-		weightType: string;
-		equipmentSettings: string;
-		duration: number;
-		exerciseType: string;
-		speed: number;
-		distance: number;
 	}>;
 }
 
@@ -47,27 +28,29 @@ export default function MuscleGroupDistribution({
 		});
 	});
 
-	const data = Object.entries(muscleGroupCounts).map(([name, value]) => ({
-		name,
-		value,
-	}));
+	const data = Object.entries(muscleGroupCounts)
+		.map(([name, value]) => ({ name, value }))
+		.sort((a, b) => b.value - a.value);
 
 	const COLORS = [
-		'var(--primary)',
-		'var(--secondary)',
-		'var(--accent)',
-		'var(--muted)',
+		'#3498db', // Bright Blue
+		'#2ecc71', // Emerald Green
+		'#e74c3c', // Vibrant Red
+		'#f39c12', // Warm Orange
+		'#9b59b6', // Purple
+		'#1abc9c', // Turquoise
+		'#34495e', // Dark Blue-Gray
 	];
 
 	return (
 		<ChartContainer
 			config={{
 				value: {
-					label: 'Exercises',
+					label: 'Exercises by Muscle Group',
 					color: 'hsl(var(--primary))',
 				},
 			}}
-			className="h-[300px]"
+			className="h-[300px] w-full"
 		>
 			<ResponsiveContainer width="100%" height="100%">
 				<PieChart>
@@ -76,9 +59,12 @@ export default function MuscleGroupDistribution({
 						cx="50%"
 						cy="50%"
 						labelLine={false}
-						outerRadius={80}
-						fill="#8884d8"
+						outerRadius="80%"
+						paddingAngle={3}
 						dataKey="value"
+						label={({ name, percent }) =>
+							`${name} (${(percent * 100).toFixed(0)}%)`
+						}
 					>
 						{data.map((entry, index) => (
 							<Cell

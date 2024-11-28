@@ -141,7 +141,7 @@ export default function ProgressDashboard() {
 						</CardContent>
 					</Card>
 				</div>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+				<div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
 					<Card className="col-span-4">
 						<CardHeader>
 							<CardTitle>Workout Frequency</CardTitle>
@@ -150,7 +150,7 @@ export default function ProgressDashboard() {
 							<WorkoutFrequency workouts={workouts} />
 						</CardContent>
 					</Card>
-					<Card className="col-span-3">
+					<Card className="col-span-4">
 						<CardHeader>
 							<CardTitle>Muscle Group Distribution</CardTitle>
 						</CardHeader>

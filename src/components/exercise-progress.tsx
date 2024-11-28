@@ -2,7 +2,14 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import {
+	Line,
+	LineChart,
+	ResponsiveContainer,
+	XAxis,
+	YAxis,
+	CartesianGrid,
+} from 'recharts';
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -15,13 +22,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Workout {
 	date: string;
 	exercises: Array<{
 		name: string;
 		weight: number;
-		// ... other properties
 	}>;
 }
 
@@ -38,7 +45,7 @@ export default function ExerciseProgress({
 
 	const exerciseNames = Array.from(
 		new Set(workouts.flatMap((w) => w.exercises.map((e) => e.name)))
-	);
+	).sort();
 
 	const exerciseData = workouts
 		.filter((workout) =>
@@ -56,21 +63,23 @@ export default function ExerciseProgress({
 		.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 	return (
-		<Card>
+		<Card className="w-full">
 			<CardHeader>
 				<CardTitle>Exercise Progress</CardTitle>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="space-y-4">
 				<Select onValueChange={setSelectedExercise} value={selectedExercise}>
-					<SelectTrigger className="w-[180px] mb-4">
+					<SelectTrigger className="w-full max-w-[300px]">
 						<SelectValue placeholder="Select an exercise" />
 					</SelectTrigger>
 					<SelectContent>
-						{exerciseNames.map((name) => (
-							<SelectItem key={name} value={name}>
-								{name}
-							</SelectItem>
-						))}
+						<ScrollArea className="h-72">
+							{exerciseNames.map((name) => (
+								<SelectItem key={name} value={name}>
+									{name}
+								</SelectItem>
+							))}
+						</ScrollArea>
 					</SelectContent>
 				</Select>
 				{selectedExercise && (
@@ -81,18 +90,32 @@ export default function ExerciseProgress({
 								color: 'hsl(var(--primary))',
 							},
 						}}
-						className="h-[300px]"
+						className="h-[300px] w-full"
 					>
 						<ResponsiveContainer width="100%" height="100%">
-							<LineChart data={exerciseData}>
-								<XAxis dataKey="date" />
-								<YAxis />
+							<LineChart
+								data={exerciseData}
+								margin={{
+									top: 10,
+									right: 10,
+									left: 0,
+									bottom: 0,
+								}}
+							>
+								<CartesianGrid
+									strokeDasharray="3 3"
+									horizontal={true}
+									vertical={false}
+								/>
+								<XAxis dataKey="date" axisLine={false} tickLine={false} />
+								<YAxis axisLine={false} tickLine={false} />
 								<ChartTooltip content={<ChartTooltipContent />} />
 								<Line
 									type="monotone"
 									dataKey="weight"
 									stroke="var(--color-weight)"
 									strokeWidth={2}
+									dot={{ r: 4 }}
 								/>
 							</LineChart>
 						</ResponsiveContainer>

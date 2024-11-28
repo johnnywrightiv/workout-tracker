@@ -305,12 +305,7 @@ export default function WorkoutForm({
 							<AccordionItem key={index} value={index.toString()}>
 								<AccordionTrigger className="hover:no-underline">
 									<div className="flex flex-wrap items-center gap-3 w-full">
-										<div className="flex items-center">
-											{exercise.exerciseType === 'Strength' ? (
-												<DumbbellIcon className="h-5 w-5" />
-											) : exercise.exerciseType === 'Cardio' ? (
-												<BikeIcon className="h-5 w-5" />
-											) : null}
+										<div className="flex items-center space-x-2">
 											{!isTemplate ? (
 												<div>
 													<input
@@ -327,6 +322,11 @@ export default function WorkoutForm({
 														}}
 													/>
 												</div>
+											) : null}
+											{exercise.exerciseType === 'Strength' ? (
+												<DumbbellIcon className="h-5 w-5" />
+											) : exercise.exerciseType === 'Cardio' ? (
+												<BikeIcon className="h-5 w-5" />
 											) : null}
 											<span
 												className={`font-medium ${exercise.completed ? 'line-through text-muted-foreground' : ''}`}
