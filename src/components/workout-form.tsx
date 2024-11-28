@@ -305,15 +305,35 @@ export default function WorkoutForm({
 							<AccordionItem key={index} value={index.toString()}>
 								<AccordionTrigger className="hover:no-underline">
 									<div className="flex flex-wrap items-center gap-3 w-full">
-										{exercise.exerciseType === 'Strength' ? (
-											<DumbbellIcon className="h-5 w-5" />
-										) : exercise.exerciseType === 'Cardio' ? (
-											<BikeIcon className="h-5 w-5" />
-										) : null}
-
-										<span className="font-medium">
-											{exercise.name || 'New Exercise'}
-										</span>
+										<div className="flex items-center">
+											{exercise.exerciseType === 'Strength' ? (
+												<DumbbellIcon className="h-5 w-5" />
+											) : exercise.exerciseType === 'Cardio' ? (
+												<BikeIcon className="h-5 w-5" />
+											) : null}
+											{!isTemplate ? (
+												<div>
+													<input
+														type="checkbox"
+														className="ml-2 mr-2"
+														checked={exercise.completed}
+														onClick={(e) => {
+															e.stopPropagation();
+															const updatedExercise = {
+																...exercise,
+																completed: !exercise.completed,
+															};
+															handleExerciseChange(index, updatedExercise);
+														}}
+													/>
+												</div>
+											) : null}
+											<span
+												className={`font-medium ${exercise.completed ? 'line-through text-muted-foreground' : ''}`}
+											>
+												{exercise.name || 'New Exercise'}
+											</span>
+										</div>
 
 										{exercise.exerciseType === 'Strength' &&
 											exercise.sets > 0 && (

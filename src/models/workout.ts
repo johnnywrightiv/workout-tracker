@@ -13,6 +13,10 @@ const exerciseSchema = new mongoose.Schema({
 	exerciseType: String,
 	speed: Number,
 	distance: Number,
+	completed: {
+		type: Boolean,
+		default: false,
+	}, // New field
 });
 
 const workoutSchema = new mongoose.Schema({

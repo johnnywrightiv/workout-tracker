@@ -18,6 +18,7 @@ const exerciseSchema = z.object({
 	exerciseType: z.string().max(50).optional(),
 	speed: z.number().min(0).optional(),
 	distance: z.number().min(0).optional(),
+	completed: z.boolean().optional(),
 });
 
 const workoutCreateSchema = z.object({
