@@ -30,7 +30,11 @@ export default function WorkoutButton() {
 			const response = await axios.get('/api/templates', {
 				withCredentials: true,
 			});
-			setTemplates(response.data);
+			// Sort templates alphabetically by name
+			const sortedTemplates = response.data.sort((a: Template, b: Template) =>
+				a.name.localeCompare(b.name)
+			);
+			setTemplates(sortedTemplates);
 		} catch (error) {
 			console.error('Failed to fetch templates:', error);
 		} finally {
