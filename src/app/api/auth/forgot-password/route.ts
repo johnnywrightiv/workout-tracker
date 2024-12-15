@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
 			user.resetPasswordExpires = resetTokenExpiry;
 			await user.save();
 
-			const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+			const baseUrl =
+				process.env.NODE_ENV === 'development'
+					? process.env.NEXT_PUBLIC_BASE_URL // Development URL
+					: 'https://workout-tracker-eta-green.vercel.app'; // Production URL
 			if (!baseUrl) {
 				throw new Error('BASE_URL environment variable is not set');
 			}
