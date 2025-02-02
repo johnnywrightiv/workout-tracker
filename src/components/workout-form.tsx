@@ -247,42 +247,54 @@ export default function WorkoutForm({
 					className="space-y-4"
 				>
 					<AccordionItem value="details">
-						<div className="flex justify-between items-center">
-							<AccordionTrigger className="hover:no-underline">
-								<div className="flex items-center gap-3 w-full">
-									<InfoIcon className="h-5 w-5 text-muted-foreground" />
-									<span className="font-medium">Details</span>
-									{formData.name && (
-										<span className="text-sm text-muted-foreground ml-2">
-											{formData.name} | {formData.duration} mins.
-										</span>
-									)}
-								</div>
-							</AccordionTrigger>
-							{!isTemplate && !expandedSections.includes('details') && (
-								<WorkoutControlButton
-									workoutStatus={workoutStatus}
-									onStart={handleStartWorkout}
-									onEnd={handleEndWorkout}
-									className="ml-auto"
-								/>
-							)}
-						</div>
+						<AccordionTrigger className="hover:no-underline bg-card px-2 rounded-[--radius]">
+							<div className="flex items-center gap-3 w-full flex-wrap sm:flex-nowrap">
+								<InfoIcon className="h-5 w-5 text-muted-foreground" />
+								<div>Details:</div>
+								<strong>{formData.name}</strong> |{' '}
+								{formData.duration !== 0
+									? `${formData.duration} mins`
+									: formData.startTime
+										? new Date(formData.startTime).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+											})
+										: ''}
+								<span className="text-muted-foreground ml-2 text-start block sm:inline">
+									{formData.notes && <span>{formData.notes}</span>}
+								</span>
+							</div>
+						</AccordionTrigger>
+
 						<AccordionContent className="pt-4">
-							<WorkoutDetails
-								formData={formData}
-								setFormData={setFormData}
-								workoutStatus={workoutStatus}
-								isTemplate={isTemplate}
-								renderControlButton={(className) => (
-									<WorkoutControlButton
-										workoutStatus={workoutStatus}
-										onStart={handleStartWorkout}
-										onEnd={handleEndWorkout}
-										className={className}
-									/>
-								)}
-							/>
+							{expandedSections.includes('details') ? (
+								<WorkoutDetails
+									formData={formData}
+									setFormData={setFormData}
+									workoutStatus={workoutStatus}
+									isTemplate={isTemplate}
+									renderControlButton={(className) => (
+										<WorkoutControlButton
+											workoutStatus={workoutStatus}
+											onStart={handleStartWorkout}
+											onEnd={handleEndWorkout}
+											className={className}
+										/>
+									)}
+								/>
+							) : (
+								<div className="text-sm text-muted-foreground">
+									<strong>{formData.name}</strong> |{' '}
+									{formData.duration !== 0
+										? `${formData.duration} mins`
+										: new Date(formData.startTime).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+											})}
+									<br />
+									{formData.notes && <span>{formData.notes}</span>}
+								</div>
+							)}
 						</AccordionContent>
 					</AccordionItem>
 				</Accordion>
