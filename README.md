@@ -13,9 +13,8 @@
 [x] removed speed settings (preference)
 [x] ability to delete last exercise
 [x] fix actions dropdown placement
+[x] search by most recent exercise in workout view
 
 ### TODO:
 
-[ ] add "last weight"
-[ ] save workouts automatically on creation and edit
 [ ] drag and drop reordering of exercises and templates

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import WorkoutForm from '@/components/workout-form';
+import RecentExerciseSearch from '@/components/recent-exercise-search';
 import axios from 'axios';
 
 export default function CreateWorkout() {
@@ -55,5 +56,10 @@ export default function CreateWorkout() {
 		);
 	}
 
-	return <WorkoutForm onSubmit={handleSubmit} initialData={initialData} />;
+	return (
+		<div className="container mx-auto px-4 py-6">
+			<RecentExerciseSearch />
+			<WorkoutForm onSubmit={handleSubmit} initialData={initialData} />
+		</div>
+	);
 }
