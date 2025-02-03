@@ -12,6 +12,7 @@
 [x] removed machine settings (preference)
 [x] removed speed settings (preference)
 [x] ability to delete last exercise
+[x] fix actions dropdown placement
 
 ### TODO:
 
