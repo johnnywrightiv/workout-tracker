@@ -12,13 +12,13 @@ import {
 import { MUSCLE_GROUPS, WEIGHT_TYPES, EXERCISE_TYPES } from '@/lib/constants';
 import { Exercise } from '@/types/workout';
 import { IncrementDecrementButton } from './increment-decrement-button';
+import { convertDistance, convertWeight } from '@/lib/utils';
 
 interface ExerciseFormProps {
 	exercise: Exercise;
 	onChange: (updatedExercise: Exercise) => void;
 	onRemove: () => void;
 	measurementSystem: 'metric' | 'imperial';
-	isLastExercise: boolean;
 }
 
 export function ExerciseForm({
@@ -26,18 +26,9 @@ export function ExerciseForm({
 	onChange,
 	onRemove,
 	measurementSystem,
-	isLastExercise,
 }: ExerciseFormProps) {
 	const handleChange = (field: keyof Exercise, value: string | number) => {
 		onChange({ ...exercise, [field]: value });
-	};
-
-	const convertWeight = (weight: number, to: 'kg' | 'lbs') => {
-		return to === 'kg' ? weight * 0.45359237 : weight / 0.45359237;
-	};
-
-	const convertDistance = (distance: number, to: 'km' | 'miles') => {
-		return to === 'km' ? distance * 1.60934 : distance / 1.60934;
 	};
 
 	return (
@@ -224,7 +215,6 @@ export function ExerciseForm({
 							variant="destructive"
 							size="sm"
 							onClick={onRemove}
-							disabled={isLastExercise}
 						>
 							Remove Exercise
 						</Button>

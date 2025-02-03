@@ -416,7 +416,7 @@ export default function Home() {
 							</Select>
 						</div>
 					</div>
-					<div className="w-full mb-4">
+					<div className="w-full">
 						<SearchBar onSearch={setSearchQuery} />
 					</div>
 				</div>

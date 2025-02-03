@@ -50,7 +50,7 @@ export function WorkoutCard({
 					<CardTitle className="text-xl font-bold">{workout.name}</CardTitle>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="h-8 w-8 p-0">
+							<Button variant="ghost" className="absolute right-8 h-8 w-8 p-0">
 								<span className="sr-only">Open menu</span>
 								<MoreVertical className="h-4 w-4" />
 							</Button>
@@ -114,8 +114,10 @@ export function WorkoutCard({
 					)}
 				</div>
 			</CardHeader>
-			<CardContent>
-				<p className="text-muted-foreground mb-4">{workout.notes}</p>
+			<CardContent className="-mt-4">
+				<p className="text-sm text-muted-foreground mb-4 border-b border-muted-foreground/20 pb-2">
+					{workout.notes}
+				</p>
 
 				{workout.exercises && (
 					<div className="space-y-4">

@@ -11,10 +11,10 @@
 [x] fix filter drawer on mobile
 [x] removed machine settings (preference)
 [x] removed speed settings (preference)
+[x] ability to delete last exercise
 
 ### TODO:
 
 [ ] add "last weight"
-[ ] ability to delete last exercise
 [ ] save workouts automatically on creation and edit
 [ ] drag and drop reordering of exercises and templates

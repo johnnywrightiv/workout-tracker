@@ -249,7 +249,7 @@ export default function WorkoutForm({
 							<div className="flex items-center gap-3 w-full flex-wrap sm:flex-nowrap">
 								<InfoIcon className="h-5 w-5 text-muted-foreground" />
 								<strong>{formData.name}</strong>
-								<div className="text-muted-foreground ml-2 text-start block">
+								<div className="text-sm text-muted-foreground ml-2 text-start block">
 									{formData.notes && <div>{formData.notes}</div>}
 								</div>
 							</div>
@@ -288,7 +288,7 @@ export default function WorkoutForm({
 					</AccordionItem>
 				</Accordion>
 
-				<div className="space-y-4 px-4">
+				<div className="space-y-4 pb-10">
 					<div className="flex items-center justify-between">
 						<h2 className="text-xl font-semibold">Exercises</h2>
 						<Button type="button" onClick={handleAddExercise} size="sm">
@@ -354,7 +354,9 @@ export default function WorkoutForm({
 
 										{exercise.exerciseType === 'Cardio' &&
 											exercise.duration > 0 && (
-												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
+												<span
+													className={`text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2 ${exercise.completed ? 'line-through text-muted-foreground' : ''}`}
+												>
 													{exercise.duration} minutes |{' '}
 													{measurementSystem === 'metric'
 														? (exercise.distance * 1.60934).toFixed(2)
@@ -395,7 +397,7 @@ export default function WorkoutForm({
 							{id ? 'Updating...' : 'Creating...'}
 						</>
 					) : (
-						`Save ${isTemplate ? 'Template' : 'Workout'}`
+						`Save  ${isTemplate ? 'Template' : 'Workout'}`
 					)}
 				</Button>
 			</form>
