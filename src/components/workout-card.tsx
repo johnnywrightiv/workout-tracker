@@ -47,7 +47,7 @@ export function WorkoutCard({
 		<Card key={workout._id} className="w-full">
 			<CardHeader className="flex flex-col">
 				<div className="flex justify-between items-start w-full">
-					<CardTitle className="text-2xl font-bold">{workout.name}</CardTitle>
+					<CardTitle className="text-xl font-bold">{workout.name}</CardTitle>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="ghost" className="h-8 w-8 p-0">
@@ -99,24 +99,6 @@ export function WorkoutCard({
 					<div className="flex items-center">
 						<Clock className="mr-1 h-4 w-4" />
 						<div>{workout.duration} minutes</div>
-					</div>
-					<div>
-						(
-						{new Date(workout.startTime).toLocaleTimeString([], {
-							hour: '2-digit',
-							minute: '2-digit',
-						})}
-						{workout.endTime && (
-							<>
-								{' '}
-								-{' '}
-								{new Date(workout.endTime).toLocaleTimeString([], {
-									hour: '2-digit',
-									minute: '2-digit',
-								})}
-							</>
-						)}
-						)
 					</div>
 					{workout.weightType && (
 						<div className="flex items-center">
@@ -180,14 +162,10 @@ export function WorkoutCard({
 													) : (
 														<span>
 															{' '}
-															{exercise.duration} mins.{' | '}
+															{exercise.duration} mins,{' '}
 															{measurementSystem === 'metric'
 																? `${convertDistance(exercise.distance, 'km').toFixed(2)} km`
 																: `${exercise.distance} miles`}{' '}
-															| Speed:{' '}
-															{measurementSystem === 'metric'
-																? `${((exercise.distance / exercise.duration) * 1.60934).toFixed(1)} km/h`
-																: `${(exercise.distance / exercise.duration).toFixed(1)} mph`}
 														</span>
 													)}
 												</div>

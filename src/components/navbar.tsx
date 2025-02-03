@@ -29,10 +29,33 @@ export default function Navbar() {
 	const pathname = usePathname();
 	const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
+	const [lastScrollY, setLastScrollY] = useState(0);
+	const [isVisible, setIsVisible] = useState(true);
+	const [scrollThreshold, setScrollThreshold] = useState(0);
 
 	useEffect(() => {
 		setIsSheetOpen(false);
 	}, [pathname]);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			const currentScrollY = window.scrollY;
+
+			if (currentScrollY > lastScrollY) {
+				// Scrolling down - hide navbar
+				setIsVisible(false);
+				setScrollThreshold(currentScrollY);
+			} else if (currentScrollY < scrollThreshold - 50) {
+				// Scrolling up past threshold - show navbar
+				setIsVisible(true);
+			}
+
+			setLastScrollY(currentScrollY);
+		};
+
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [lastScrollY, scrollThreshold]);
 
 	const navItems = [
 		{ href: '/', label: 'Home', icon: Home },
@@ -160,7 +183,9 @@ export default function Navbar() {
 			{/* Mobile Bottom Navigation Bar */}
 			{isAuthenticated && (
 				<div
-					className="fixed bottom-0 left-0 right-0 z-10 flex flex-row justify-between space-x-2 border-t border-primary bg-background p-2 md:hidden"
+					className={`fixed bottom-0 left-0 right-0 z-10 flex flex-row justify-between space-x-2 border-t border-primary bg-background p-2 md:hidden transition-transform duration-300 ${
+						isVisible ? 'translate-y-0' : 'translate-y-full'
+					}`}
 					role="navigation"
 					aria-label="Mobile Navigation"
 				>

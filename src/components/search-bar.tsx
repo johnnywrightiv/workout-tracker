@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface SearchBarProps {
@@ -16,12 +17,15 @@ export function SearchBar({ onSearch }: SearchBarProps) {
 	};
 
 	return (
-		<Input
-			type="search"
-			placeholder="Search workouts or exercises..."
-			value={query}
-			onChange={handleSearch}
-			className="w-full"
-		/>
+		<div className="relative w-full">
+			<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+			<Input
+				type="search"
+				placeholder="Search workouts or exercises..."
+				value={query}
+				onChange={handleSearch}
+				className="px-8 w-full"
+			/>
+		</div>
 	);
 }

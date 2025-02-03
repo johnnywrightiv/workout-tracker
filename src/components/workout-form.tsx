@@ -88,8 +88,10 @@ export default function WorkoutForm({
 		if (initialData) {
 			if (initialData.endTime) {
 				setWorkoutStatus('completed');
+				setExpandedSections([]); // Close details when completed
 			} else if (initialData.startTime) {
 				setWorkoutStatus('in_progress');
+				setExpandedSections([]);
 			}
 		}
 	}, [initialData]);
@@ -236,10 +238,6 @@ export default function WorkoutForm({
 	return (
 		<div className="container max-w-2xl mx-auto px-4 py-6">
 			<form onSubmit={handleSubmit} className="space-y-6">
-				<h1 className="text-2xl font-bold">
-					{id ? 'Edit' : 'Create'} {isTemplate ? 'Template' : 'Workout'}
-				</h1>
-
 				<Accordion
 					type="multiple"
 					value={expandedSections}
@@ -250,19 +248,10 @@ export default function WorkoutForm({
 						<AccordionTrigger className="hover:no-underline bg-card px-2 rounded-[--radius]">
 							<div className="flex items-center gap-3 w-full flex-wrap sm:flex-nowrap">
 								<InfoIcon className="h-5 w-5 text-muted-foreground" />
-								<div>Details:</div>
-								<strong>{formData.name}</strong> |{' '}
-								{formData.duration !== 0
-									? `${formData.duration} mins`
-									: formData.startTime
-										? new Date(formData.startTime).toLocaleTimeString([], {
-												hour: '2-digit',
-												minute: '2-digit',
-											})
-										: ''}
-								<span className="text-muted-foreground ml-2 text-start block sm:inline">
-									{formData.notes && <span>{formData.notes}</span>}
-								</span>
+								<strong>{formData.name}</strong>
+								<div className="text-muted-foreground ml-2 text-start block">
+									{formData.notes && <div>{formData.notes}</div>}
+								</div>
 							</div>
 						</AccordionTrigger>
 
@@ -349,7 +338,9 @@ export default function WorkoutForm({
 
 										{exercise.exerciseType === 'Strength' &&
 											exercise.sets > 0 && (
-												<span className="text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2">
+												<span
+													className={`text-sm text-muted-foreground flex justify-start w-full sm:w-auto sm:ml-0 ml-8 sm:mt-0 -mt-2 ${exercise.completed ? 'line-through text-muted-foreground' : ''}`}
+												>
 													{exercise.sets} x {exercise.reps} @{' '}
 													{measurementSystem === 'metric'
 														? (exercise.weight * 0.45359237).toFixed(1)
@@ -368,16 +359,14 @@ export default function WorkoutForm({
 													{measurementSystem === 'metric'
 														? (exercise.distance * 1.60934).toFixed(2)
 														: exercise.distance}{' '}
-													{measurementSystem === 'metric' ? 'km' : 'miles'} |
-													Speed:{' '}
-													{measurementSystem === 'metric'
-														? `${((exercise.distance / exercise.duration) * 1.60934).toFixed(1)} km/h`
-														: `${(exercise.distance / exercise.duration).toFixed(1)} mph`}{' '}
+													{measurementSystem === 'metric' ? 'km' : 'miles'}
 												</span>
 											)}
 
 										{exercise.notes && (
-											<span className="text-sm text-start text-muted-foreground w-full ml-8 -mt-2">
+											<span
+												className={`text-sm text-start text-muted-foreground w-full ml-8 -mt-2 ${exercise.completed ? 'line-through text-muted-foreground' : ''}`}
+											>
 												{exercise.notes}
 											</span>
 										)}

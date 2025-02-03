@@ -25,7 +25,7 @@ export function Toaster() {
 							)}
 						</div>
 						{action}
-						<ToastClose />
+						<ToastClose className="bg-secondary hover:bg-secondary/80" />
 					</Toast>
 				);
 			})}

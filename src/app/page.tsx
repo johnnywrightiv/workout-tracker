@@ -183,12 +183,10 @@ export default function Home() {
 
 	const FilterContent = () => (
 		<>
-			<SheetHeader className="mt-4">
+			<SheetHeader className="">
 				<SheetTitle>Filter Workouts</SheetTitle>
 			</SheetHeader>
-			<SheetDescription className="mb-2">
-				Configure options to filter your workout history{' '}
-			</SheetDescription>
+			<SheetDescription />
 			<div className="py-4 space-y-6">
 				<div className="space-y-4">
 					<Label>Date Range</Label>
@@ -303,7 +301,7 @@ export default function Home() {
 					</div>
 				))}
 			</div>
-			<SheetFooter className="mt-8">
+			<SheetFooter className="">
 				<Button variant="outline" onClick={resetFilters} className="w-full">
 					Reset Filters
 				</Button>

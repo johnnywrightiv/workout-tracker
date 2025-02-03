@@ -42,7 +42,7 @@ export function IncrementDecrementButton({
 						allowDecimals ? Number(newValue.toFixed(2)) : Math.floor(newValue)
 					);
 				}}
-				className="flex w-20 h-8 text-center mx-1"
+				className="flex w-1/4 h-8 text-center mx-1"
 				min={min}
 				step={allowDecimals ? '0.01' : '1'}
 			/>

@@ -124,22 +124,6 @@ export function ExerciseForm({
 									</Select>
 								</div>
 							</div>
-							<div className="space-y-2">
-								<label
-									htmlFor="equipmentSettings"
-									className="text-sm font-medium"
-								>
-									Equipment Settings
-								</label>
-								<Input
-									id="equipmentSettings"
-									placeholder="e.g. seat height #5"
-									value={exercise.equipmentSettings}
-									onChange={(e) =>
-										handleChange('equipmentSettings', e.target.value)
-									}
-								/>
-							</div>
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
 								<div className="text-center space-y-2 min-w-0">
 									<label
@@ -199,17 +183,6 @@ export function ExerciseForm({
 								<IncrementDecrementButton
 									value={exercise.duration}
 									onChange={(value) => handleChange('duration', value)}
-								/>
-							</div>
-							<div className="space-y-2 min-w-0">
-								<label htmlFor="speed" className="text-sm font-medium truncate">
-									Speed ({measurementSystem === 'metric' ? 'km/h' : 'mph'})
-								</label>
-								<IncrementDecrementButton
-									value={exercise.speed}
-									onChange={(value) => handleChange('speed', value)}
-									step={0.1}
-									allowDecimals={true}
 								/>
 							</div>
 							<div className="space-y-2 min-w-0">
