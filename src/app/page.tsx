@@ -349,7 +349,10 @@ export default function Home() {
 					<h1 className="text-3xl sm:text-4xl font-bold w-full sm:w-auto">
 						Past Workouts
 					</h1>
-					<h2 className="text-italic">Remember: you EARN progressive overload through RECOVERY, not by FORCING extra during workouts.</h2>
+					<h2 className="text-italic">
+						Remember: you EARN progressive overload through RECOVERY, not by
+						FORCING extra during workouts.
+					</h2>
 
 					{/* Filter and Sort Controls */}
 					<div className="w-full sm:w-auto flex flex-row gap-4 justify-end">

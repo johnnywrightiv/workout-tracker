@@ -35,7 +35,7 @@ export default function CreateWorkout() {
 		loadTemplateData();
 	}, [templateId]);
 
-	const handleSubmit = async (data) => {
+	const handleSubmit = async (data: any) => {
 		await axios.post(
 			'/api/workouts',
 			{

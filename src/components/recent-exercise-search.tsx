@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Input } from '@/components/ui/input';
 
-export default function RecentExerciseSearch({ onSelect }) {
+export default function RecentExerciseSearch({}) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [mostRecentExercise, setMostRecentExercise] = useState(null);
 
@@ -14,13 +14,15 @@ export default function RecentExerciseSearch({ onSelect }) {
 				const { data } = await axios.get(`/api/workouts`, {
 					withCredentials: true,
 				});
-				const filteredExercises = data.flatMap((workout) =>
-					workout.exercises.filter((exercise) =>
-						exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
-					)
+				const filteredExercises = data.flatMap(
+					(workout: { exercises: any[] }) =>
+						workout.exercises.filter((exercise: { name: string }) =>
+							exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
+						)
 				);
 				const sortedExercises = filteredExercises.sort(
-					(a, b) => Date.parse(b.date) - Date.parse(a.date)
+					(a: { date: string }, b: { date: string }) =>
+						Date.parse(b.date) - Date.parse(a.date)
 				);
 				console.log(sortedExercises); // Add this to check the sorted order
 				setMostRecentExercise(
