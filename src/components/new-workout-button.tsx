@@ -3,103 +3,103 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Dumbbell, File } from 'lucide-react';
 import axios from 'axios';
 
 interface Template {
-  _id: string;
-  name: string;
+	_id: string;
+	name: string;
 }
 
 export default function WorkoutButton() {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+	const [templates, setTemplates] = useState<Template[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [open, setOpen] = useState(false);
+	const router = useRouter();
 
-  // Fetch templates when dropdown is opened
-  const handleDropdownOpen = async () => {
-    try {
-      const response = await axios.get('/api/templates', {
-        withCredentials: true,
-      });
-      // Sort templates alphabetically by name
-      const sortedTemplates = response.data.sort((a: Template, b: Template) =>
-        a.name.localeCompare(b.name),
-      );
-      setTemplates(sortedTemplates);
-    } catch (error) {
-      console.error('Failed to fetch templates:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+	// Fetch templates when dropdown is opened
+	const handleDropdownOpen = async () => {
+		try {
+			const response = await axios.get('/api/templates', {
+				withCredentials: true,
+			});
+			// Sort templates alphabetically by name
+			const sortedTemplates = response.data.sort((a: Template, b: Template) =>
+				a.name.localeCompare(b.name)
+			);
+			setTemplates(sortedTemplates);
+		} catch (error) {
+			console.error('Failed to fetch templates:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const handleTemplateSelect = async (templateId: string) => {
-    try {
-      // Navigate to new workout form with template data
-      router.push(`/workout/new?template=${templateId}`);
-    } catch (error) {
-      console.error('Failed to load template:', error);
-    }
-    setOpen(false);
-  };
+	const handleTemplateSelect = async (templateId: string) => {
+		try {
+			// Navigate to new workout form with template data
+			router.push(`/workout/new?template=${templateId}`);
+		} catch (error) {
+			console.error('Failed to load template:', error);
+		}
+		setOpen(false);
+	};
 
-  return (
-    <DropdownMenu
-      open={open}
-      onOpenChange={(isOpen) => {
-        setOpen(isOpen);
-        if (isOpen) handleDropdownOpen();
-      }}
-    >
-      <DropdownMenuTrigger asChild>
-        <Button>
-          <Dumbbell className="mr-2 h-4 w-4" />
-          New Workout
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem
-          onClick={() => {
-            router.push('/workout/new');
-            setOpen(false);
-          }}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create New Workout
-        </DropdownMenuItem>
+	return (
+		<DropdownMenu
+			open={open}
+			onOpenChange={(isOpen) => {
+				setOpen(isOpen);
+				if (isOpen) handleDropdownOpen();
+			}}
+		>
+			<DropdownMenuTrigger asChild>
+				<Button>
+					<Dumbbell className="mr-2 h-4 w-4" />
+					New Workout
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-56">
+				<DropdownMenuItem
+					onClick={() => {
+						router.push('/workout/new');
+						setOpen(false);
+					}}
+				>
+					<PlusCircle className="mr-2 h-4 w-4" />
+					Create New Workout
+				</DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+				<DropdownMenuSeparator />
 
-        <div className="px-2 py-1.5 text-sm font-semibold">Templates</div>
-        {loading ? (
-          <div className="flex items-center justify-center py-2">
-            <div className="border-primary border-t-accent flex h-16 w-16 animate-spin items-center justify-center rounded-full border-4 border-t-4 border-solid" />
-          </div>
-        ) : templates.length > 0 ? (
-          templates.map((template) => (
-            <DropdownMenuItem
-              key={template._id}
-              onClick={() => handleTemplateSelect(template._id)}
-            >
-              <File className="mr-2 h-4 w-4" />
-              {template.name}
-            </DropdownMenuItem>
-          ))
-        ) : (
-          <div className="text-muted-foreground px-2 py-1.5 text-sm">
-            No templates available
-          </div>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+				<div className="px-2 py-1.5 text-sm font-semibold">Templates</div>
+				{loading ? (
+					<div className="flex items-center justify-center py-2">
+						<div className="border-primary border-t-accent flex h-16 w-16 animate-spin items-center justify-center rounded-full border-4 border-t-4 border-solid" />
+					</div>
+				) : templates.length > 0 ? (
+					templates.map((template) => (
+						<DropdownMenuItem
+							key={template._id}
+							onClick={() => handleTemplateSelect(template._id)}
+						>
+							<File className="mr-2 h-4 w-4" />
+							{template.name}
+						</DropdownMenuItem>
+					))
+				) : (
+					<div className="text-muted-foreground px-2 py-1.5 text-sm">
+						No templates available
+					</div>
+				)}
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
 }

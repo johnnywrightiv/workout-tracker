@@ -8,33 +8,33 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 const LogoutButton = () => {
-  const dispatch = useDispatch();
-  const router = useRouter();
+	const dispatch = useDispatch();
+	const router = useRouter();
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        '/api/auth/logout',
-        {},
-        {
-          withCredentials: true,
-        },
-      );
+	const handleLogout = async () => {
+		try {
+			await axios.post(
+				'/api/auth/logout',
+				{},
+				{
+					withCredentials: true,
+				}
+			);
 
-      dispatch(logout());
+			dispatch(logout());
 
-      router.push('/');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
+			router.push('/');
+		} catch (error) {
+			console.error('Logout failed:', error);
+		}
+	};
 
-  return (
-    <Button onClick={handleLogout}>
-      <LogOut className="mr-2 h-4 w-4" />
-      <span>Logout</span>
-    </Button>
-  );
+	return (
+		<Button onClick={handleLogout}>
+			<LogOut className="mr-2 h-4 w-4" />
+			<span>Logout</span>
+		</Button>
+	);
 };
 
 export default LogoutButton;
