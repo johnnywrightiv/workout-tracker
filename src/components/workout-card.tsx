@@ -122,12 +122,12 @@ export function WorkoutCard({
 				{workout.exercises && (
 					<div className="space-y-4">
 						{Object.entries(
-							workout.exercises.reduce(
-								(acc, exercise) => {
+							(workout.exercises || []).reduce(
+								(acc: Record<string, any[]>, exercise: any) => {
 									const group =
 										exercise.exerciseType === 'Cardio'
 											? 'Cardio'
-											: exercise.muscleGroup;
+											: exercise.muscleGroup || 'Other';
 
 									if (!acc[group]) {
 										acc[group] = [];
@@ -135,54 +135,60 @@ export function WorkoutCard({
 									acc[group].push(exercise);
 									return acc;
 								},
-								{} as Record<string, typeof workout.exercises>
+								{} as Record<string, any[]>
 							)
-						).map(([category, exercises]) => (
-							<div key={category}>
-								<h4 className="mb-2 font-semibold">
-									{category === 'Cardio' ? 'Cardio Exercises' : category}
-								</h4>
+						).map(([category, exercises]) => {
+							const exerciseArray = exercises as any[];
+							return (
+								<div key={category}>
+									<h4 className="mb-2 font-semibold">
+										{category === 'Cardio' ? 'Cardio Exercises' : category}
+									</h4>
 
-								<ul className="space-y-4">
-									{exercises.map((exercise, index) => (
-										<li key={index} className="flex flex-col">
-											<div className="flex items-center space-x-2">
-												<div className="bg-foreground mr-2 h-1 w-1 flex-shrink-0 rounded-full" />
-												<div className="text-sm">
-													<strong>{exercise.name}</strong>
-													{exercise.exerciseType === 'Strength' ? (
-														<span>
-															: {exercise.sets} × {exercise.reps} @{' '}
-															{measurementSystem === 'metric'
-																? `${convertWeight(exercise.weight, 'kg').toFixed(1)} kg`
-																: `${exercise.weight} lbs`}
-															{exercise.weightType &&
-																` (${exercise.weightType})`}
-															{exercise.equipmentSettings &&
-																` | ${exercise.equipmentSettings}`}
-														</span>
-													) : (
-														<span>
-															{' '}
-															{exercise.duration} mins,{' '}
-															{measurementSystem === 'metric'
-																? `${convertDistance(exercise.distance, 'km').toFixed(2)} km`
-																: `${exercise.distance} miles`}{' '}
-														</span>
-													)}
+									<ul className="space-y-4">
+										{exerciseArray.map((exercise: any, index: number) => (
+											<li key={index} className="flex flex-col">
+												<div className="flex items-center space-x-2">
+													<div className="bg-foreground mr-2 h-1 w-1 flex-shrink-0 rounded-full" />
+													<div className="text-sm">
+														<strong>{exercise.name}</strong>
+														{exercise.exerciseType === 'Strength' &&
+														exercise.sets &&
+														exercise.reps &&
+														exercise.weight ? (
+															<span>
+																: {exercise.sets} × {exercise.reps} @{' '}
+																{measurementSystem === 'metric'
+																	? `${convertWeight(exercise.weight, 'kg').toFixed(1)} kg`
+																	: `${exercise.weight} lbs`}
+																{exercise.weightType &&
+																	` (${exercise.weightType})`}
+																{exercise.equipmentSettings &&
+																	` | ${exercise.equipmentSettings}`}
+															</span>
+														) : exercise.duration && exercise.distance ? (
+															<span>
+																{' '}
+																{exercise.duration} mins,{' '}
+																{measurementSystem === 'metric'
+																	? `${convertDistance(exercise.distance, 'km').toFixed(2)} km`
+																	: `${exercise.distance} miles`}{' '}
+															</span>
+														) : null}
+													</div>
 												</div>
-											</div>
 
-											{exercise.notes && (
-												<div className="text-muted-foreground ml-6 text-sm">
-													{exercise.notes}
-												</div>
-											)}
-										</li>
-									))}
-								</ul>
-							</div>
-						))}
+												{exercise.notes && (
+													<div className="text-muted-foreground ml-6 text-sm">
+														{exercise.notes}
+													</div>
+												)}
+											</li>
+										))}
+									</ul>
+								</div>
+							);
+						})}
 					</div>
 				)}
 			</CardContent>

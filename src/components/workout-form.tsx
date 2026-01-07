@@ -10,7 +10,13 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Loader2, DumbbellIcon, InfoIcon, BikeIcon } from 'lucide-react';
+import {
+	Loader2,
+	DumbbellIcon,
+	InfoIcon,
+	BikeIcon,
+	GripVertical,
+} from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import {
@@ -23,6 +29,23 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+	DndContext,
+	closestCenter,
+	KeyboardSensor,
+	PointerSensor,
+	useSensor,
+	useSensors,
+	DragEndEvent,
+} from '@dnd-kit/core';
+import {
+	arrayMove,
+	SortableContext,
+	sortableKeyboardCoordinates,
+	useSortable,
+	verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { ExerciseForm } from './exercise-form';
 import { WorkoutDetails } from './workout-details';
 import { WorkoutControlButton } from './workout-control-button';
@@ -33,6 +56,139 @@ interface WorkoutFormProps {
 	isTemplate?: boolean;
 	id?: string;
 	onSubmit: (data: FormData) => Promise<void>;
+}
+
+interface SortableExerciseItemProps {
+	exercise: Exercise;
+	index: number;
+	isTemplate: boolean;
+	measurementSystem: 'metric' | 'imperial';
+	expandedExercise: string | null;
+	onExerciseChange: (index: number, updatedExercise: Exercise) => void;
+	onRemoveExercise: (index: number) => void;
+	onExpandChange: (value: string | null) => void;
+}
+
+function SortableExerciseItem({
+	exercise,
+	index,
+	isTemplate,
+	measurementSystem,
+	expandedExercise,
+	onExerciseChange,
+	onRemoveExercise,
+	onExpandChange,
+}: SortableExerciseItemProps) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
+		id: index.toString(),
+		animateLayoutChanges: () => false,
+	});
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition: isDragging ? 'none' : transition,
+		opacity: isDragging ? 0.5 : 1,
+	};
+
+	return (
+		<div ref={setNodeRef} style={style} className="relative">
+			<div
+				{...attributes}
+				{...listeners}
+				className="absolute -left-5 top-4 cursor-grab active:cursor-grabbing touch-none z-0"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<GripVertical className="h-5 w-5 text-muted-foreground" />
+			</div>
+			<AccordionItem value={index.toString()}>
+				<AccordionTrigger className="hover:no-underline items-start [&>svg]:mt-1">
+					<div className="flex w-full flex-wrap items-center gap-3">
+						<div className="flex items-center space-x-2">
+							{!isTemplate ? (
+								<div>
+									<input
+										type="checkbox"
+										className="ml-2 mr-2"
+										checked={exercise.completed}
+										onClick={(e) => {
+											e.stopPropagation();
+											const updatedExercise = {
+												...exercise,
+												completed: !exercise.completed,
+											};
+											onExerciseChange(index, updatedExercise);
+										}}
+									/>
+								</div>
+							) : null}
+							{exercise.exerciseType === 'Strength' ? (
+								<DumbbellIcon className="h-5 w-5" />
+							) : exercise.exerciseType === 'Cardio' ? (
+								<BikeIcon className="h-5 w-5" />
+							) : null}
+							<span
+								className={`font-medium ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
+							>
+								{exercise.name || 'New Exercise'}
+							</span>
+						</div>
+
+						{exercise.exerciseType === 'Strength' && exercise.sets > 0 && (
+							<span
+								className={`text-muted-foreground -mt-2 ml-8 flex w-full justify-start text-sm sm:ml-0 sm:mt-0 sm:w-auto ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
+							>
+								{exercise.sets} x {exercise.reps} @{' '}
+								{measurementSystem === 'metric'
+									? (exercise.weight * 0.45359237).toFixed(1)
+									: exercise.weight}{' '}
+								{measurementSystem === 'metric' ? 'kg' : 'lbs'}
+								{exercise.weightType && ` (${exercise.weightType})`}
+								{exercise.equipmentSettings &&
+									` | ${exercise.equipmentSettings}`}
+							</span>
+						)}
+
+						{exercise.exerciseType === 'Cardio' && exercise.duration > 0 && (
+							<span
+								className={`text-muted-foreground -mt-2 ml-8 flex w-full justify-start text-sm sm:ml-0 sm:mt-0 sm:w-auto ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
+							>
+								{exercise.duration} minutes |{' '}
+								{measurementSystem === 'metric'
+									? (exercise.distance * 1.60934).toFixed(2)
+									: exercise.distance}{' '}
+								{measurementSystem === 'metric' ? 'km' : 'miles'}
+							</span>
+						)}
+
+						{exercise.notes && (
+							<span
+								className={`text-muted-foreground -mt-2 ml-8 w-full text-start text-sm ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
+							>
+								{exercise.notes}
+							</span>
+						)}
+					</div>
+				</AccordionTrigger>
+				<AccordionContent className="pt-4">
+					<ExerciseForm
+						exercise={exercise}
+						onChange={(updatedExercise) =>
+							onExerciseChange(index, updatedExercise)
+						}
+						onRemove={() => onRemoveExercise(index)}
+						measurementSystem={measurementSystem}
+					/>
+				</AccordionContent>
+			</AccordionItem>
+		</div>
+	);
 }
 
 export default function WorkoutForm({
@@ -149,6 +305,56 @@ export default function WorkoutForm({
 		});
 		setExpandedExercise(null);
 	};
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		const { active, over } = event;
+
+		if (over && active.id !== over.id) {
+			const oldIndex = parseInt(active.id.toString());
+			const newIndex = parseInt(over.id.toString());
+
+			const newExercises = arrayMove(formData.exercises, oldIndex, newIndex);
+
+			// Update expandedExercise index after reordering
+			if (expandedExercise !== null) {
+				const expandedIndex = parseInt(expandedExercise);
+				let newExpandedIndex = expandedIndex;
+
+				if (expandedIndex === oldIndex) {
+					// The dragged item was expanded, move it to new position
+					newExpandedIndex = newIndex;
+				} else {
+					// Another item was expanded, adjust its index
+					if (oldIndex < expandedIndex && newIndex >= expandedIndex) {
+						// Item moved from before to after expanded item
+						newExpandedIndex = expandedIndex - 1;
+					} else if (oldIndex > expandedIndex && newIndex <= expandedIndex) {
+						// Item moved from after to before expanded item
+						newExpandedIndex = expandedIndex + 1;
+					}
+					// Otherwise, expandedIndex stays the same
+				}
+
+				setExpandedExercise(newExpandedIndex.toString());
+			}
+
+			setFormData({
+				...formData,
+				exercises: newExercises,
+			});
+		}
+	};
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates,
+		})
+	);
 
 	const handleStartWorkout = () => {
 		setFormData({
@@ -295,99 +501,38 @@ export default function WorkoutForm({
 							Add Exercise
 						</Button>
 					</div>
-					<Accordion
-						type="single"
-						value={expandedExercise}
-						onValueChange={(value) => setExpandedExercise(value)}
-						collapsible
-						className="space-y-4"
+					<DndContext
+						sensors={sensors}
+						collisionDetection={closestCenter}
+						onDragEnd={handleDragEnd}
 					>
-						{formData.exercises.map((exercise, index) => (
-							<AccordionItem key={index} value={index.toString()}>
-								<AccordionTrigger className="hover:no-underline">
-									<div className="flex w-full flex-wrap items-center gap-3">
-										<div className="flex items-center space-x-2">
-											{!isTemplate ? (
-												<div>
-													<input
-														type="checkbox"
-														className="ml-2 mr-2"
-														checked={exercise.completed}
-														onClick={(e) => {
-															e.stopPropagation();
-															const updatedExercise = {
-																...exercise,
-																completed: !exercise.completed,
-															};
-															handleExerciseChange(index, updatedExercise);
-														}}
-													/>
-												</div>
-											) : null}
-											{exercise.exerciseType === 'Strength' ? (
-												<DumbbellIcon className="h-5 w-5" />
-											) : exercise.exerciseType === 'Cardio' ? (
-												<BikeIcon className="h-5 w-5" />
-											) : null}
-											<span
-												className={`font-medium ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
-											>
-												{exercise.name || 'New Exercise'}
-											</span>
-										</div>
-
-										{exercise.exerciseType === 'Strength' &&
-											exercise.sets > 0 && (
-												<span
-													className={`text-muted-foreground -mt-2 ml-8 flex w-full justify-start text-sm sm:ml-0 sm:mt-0 sm:w-auto ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
-												>
-													{exercise.sets} x {exercise.reps} @{' '}
-													{measurementSystem === 'metric'
-														? (exercise.weight * 0.45359237).toFixed(1)
-														: exercise.weight}{' '}
-													{measurementSystem === 'metric' ? 'kg' : 'lbs'}
-													{exercise.weightType && ` (${exercise.weightType})`}
-													{exercise.equipmentSettings &&
-														` | ${exercise.equipmentSettings}`}
-												</span>
-											)}
-
-										{exercise.exerciseType === 'Cardio' &&
-											exercise.duration > 0 && (
-												<span
-													className={`text-muted-foreground -mt-2 ml-8 flex w-full justify-start text-sm sm:ml-0 sm:mt-0 sm:w-auto ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
-												>
-													{exercise.duration} minutes |{' '}
-													{measurementSystem === 'metric'
-														? (exercise.distance * 1.60934).toFixed(2)
-														: exercise.distance}{' '}
-													{measurementSystem === 'metric' ? 'km' : 'miles'}
-												</span>
-											)}
-
-										{exercise.notes && (
-											<span
-												className={`text-muted-foreground -mt-2 ml-8 w-full text-start text-sm ${exercise.completed ? 'text-muted-foreground line-through' : ''}`}
-											>
-												{exercise.notes}
-											</span>
-										)}
-									</div>
-								</AccordionTrigger>
-								<AccordionContent className="pt-4">
-									<ExerciseForm
+						<SortableContext
+							items={formData.exercises.map((_, index) => index.toString())}
+							strategy={verticalListSortingStrategy}
+						>
+							<Accordion
+								type="single"
+								value={expandedExercise || undefined}
+								onValueChange={(value) => setExpandedExercise(value)}
+								collapsible
+								className="space-y-4"
+							>
+								{formData.exercises.map((exercise, index) => (
+									<SortableExerciseItem
+										key={index}
 										exercise={exercise}
-										onChange={(updatedExercise) =>
-											handleExerciseChange(index, updatedExercise)
-										}
-										onRemove={() => handleRemoveExercise(index)}
+										index={index}
+										isTemplate={isTemplate}
 										measurementSystem={measurementSystem}
-										isLastExercise={index === formData.exercises.length - 1}
+										expandedExercise={expandedExercise}
+										onExerciseChange={handleExerciseChange}
+										onRemoveExercise={handleRemoveExercise}
+										onExpandChange={setExpandedExercise}
 									/>
-								</AccordionContent>
-							</AccordionItem>
-						))}
-					</Accordion>
+								))}
+							</Accordion>
+						</SortableContext>
+					</DndContext>
 				</div>
 
 				<Button type="submit" className="w-full" disabled={isLoading}>

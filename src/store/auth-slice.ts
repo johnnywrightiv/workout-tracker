@@ -33,12 +33,15 @@ const authSlice = createSlice({
 	initialState,
 	reducers: {
 		login: (state, action: PayloadAction<AuthState['user']>) => {
+			if (!action.payload) return;
 			state.isAuthenticated = true;
 			state.user = {
-				...action.payload,
+				userId: action.payload.userId,
+				email: action.payload.email,
+				name: action.payload.name,
 				preferences: {
 					...defaultPreferences,
-					...action.payload?.preferences,
+					...action.payload.preferences,
 				},
 			};
 		},
@@ -71,21 +74,27 @@ const authSlice = createSlice({
 			}
 		},
 		setUserDetails: (state, action: PayloadAction<AuthState['user']>) => {
+			if (!action.payload) return;
 			state.user = {
-				...action.payload,
+				userId: action.payload.userId,
+				email: action.payload.email,
+				name: action.payload.name,
 				preferences: {
 					...defaultPreferences,
-					...action.payload?.preferences,
+					...action.payload.preferences,
 				},
 			};
 		},
 		setAuthenticated: (state, action: PayloadAction<AuthState['user']>) => {
+			if (!action.payload) return;
 			state.isAuthenticated = true;
 			state.user = {
-				...action.payload,
+				userId: action.payload.userId,
+				email: action.payload.email,
+				name: action.payload.name,
 				preferences: {
 					...defaultPreferences,
-					...action.payload?.preferences,
+					...action.payload.preferences,
 				},
 			};
 		},

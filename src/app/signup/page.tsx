@@ -142,6 +142,10 @@ const Signup = () => {
 						userId: data.userId,
 						email: data.email,
 						name: data.name,
+						preferences: {
+							colorScheme: 'blue',
+							measurementSystem: 'imperial',
+						},
 					})
 				);
 			} else {

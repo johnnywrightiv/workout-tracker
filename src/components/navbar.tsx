@@ -189,7 +189,8 @@ export default function Navbar() {
 					role="navigation"
 					aria-label="Mobile Navigation"
 				>
-					{[...mobileNavItems, settingsItem].map((link) => {
+					{[...mobileNavItems, settingsItem].filter(Boolean).map((link) => {
+						if (!link) return null;
 						const Icon = link.icon;
 						return (
 							<Link

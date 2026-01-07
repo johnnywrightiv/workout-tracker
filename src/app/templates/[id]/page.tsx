@@ -6,10 +6,10 @@ import WorkoutForm from '@/components/workout-form';
 import axios from 'axios';
 
 export default function EditTemplate() {
-	const [template, setTemplate] = useState(null);
+	const [template, setTemplate] = useState<any>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const params = useParams();
-	const id = params.id;
+	const id = typeof params.id === 'string' ? params.id : params.id?.[0];
 
 	useEffect(() => {
 		async function fetchTemplate() {
@@ -29,7 +29,7 @@ export default function EditTemplate() {
 		fetchTemplate();
 	}, [id]);
 
-	const handleSubmit = async (data) => {
+	const handleSubmit = async (data: any) => {
 		try {
 			await axios.put(`/api/templates/${id}`, data, {
 				withCredentials: true,

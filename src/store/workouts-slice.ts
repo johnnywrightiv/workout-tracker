@@ -3,19 +3,35 @@ import axios from 'axios';
 
 interface Exercise {
 	name: string;
-	sets: number;
-	reps: number;
-	weight: number;
+	sets?: number;
+	reps?: number;
+	weight?: number;
+	notes?: string;
+	muscleGroup?: string;
+	weightType?: string;
+	equipmentSettings?: string;
+	duration?: number;
+	exerciseType?: string;
+	speed?: number;
+	distance?: number;
+	completed?: boolean;
 }
 
 // eslint-disable-next-line no-unused-vars
 interface Workout {
 	_id: string;
 	user_id: string;
+	name: string;
 	date: string;
 	duration: number;
-	notes: string;
+	notes?: string;
 	exercises: Exercise[];
+}
+
+interface WorkoutsState {
+	items: Workout[];
+	loading: boolean;
+	error: string | null;
 }
 
 // Async thunk for fetching workouts
@@ -38,9 +54,9 @@ export const fetchWorkouts = createAsyncThunk(
 const workoutsSlice = createSlice({
 	name: 'workouts',
 	initialState: {
-		items: [],
+		items: [] as Workout[],
 		loading: false,
-		error: null,
+		error: null as string | null,
 	},
 	reducers: {
 		clearWorkouts: (state) => {
@@ -65,7 +81,7 @@ const workoutsSlice = createSlice({
 			})
 			.addCase(fetchWorkouts.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.error.message;
+				state.error = action.error?.message || 'Failed to fetch workouts';
 			});
 	},
 });

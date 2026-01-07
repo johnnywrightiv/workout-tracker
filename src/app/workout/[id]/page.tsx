@@ -5,12 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import WorkoutForm from '@/components/workout-form';
 import { Loader2 } from 'lucide-react';
-import RecentExerciseSearch from '@/components/recent-exercise-search';
+import { FormData } from '@/types/workout';
 
 export default function EditWorkout() {
 	const [workout, setWorkout] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const { id } = useParams();
+	const params = useParams();
+	const id = typeof params.id === 'string' ? params.id : params.id?.[0];
 	const router = useRouter();
 
 	useEffect(() => {
@@ -30,7 +31,8 @@ export default function EditWorkout() {
 		fetchWorkout();
 	}, [id]);
 
-	const handleSubmit = async (data) => {
+	const handleSubmit = async (data: FormData) => {
+		if (!id) return;
 		await axios.put(`/api/workouts/${id}`, data, { withCredentials: true });
 		router.push('/');
 	};
@@ -45,7 +47,6 @@ export default function EditWorkout() {
 
 	return workout ? (
 		<div className="container mx-auto px-4 py-6">
-			<RecentExerciseSearch />
 			<WorkoutForm initialData={workout} id={id} onSubmit={handleSubmit} />
 		</div>
 	) : (

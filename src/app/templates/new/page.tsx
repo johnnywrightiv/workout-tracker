@@ -10,12 +10,12 @@ export default function NewTemplate() {
 	const searchParams = useSearchParams();
 	const workoutId = searchParams.get('workoutId');
 
-	const [initialData, setInitialData] = useState(null);
+	const [initialData, setInitialData] = useState<any>(null);
 	const [isLoading, setIsLoading] = useState(!!workoutId);
 
 	useEffect(() => {
 		if (workoutId) {
-			async function fetchWorkout() {
+			const fetchWorkout = async () => {
 				try {
 					const response = await axios.get(`/api/workouts/${workoutId}`, {
 						withCredentials: true,
@@ -26,12 +26,12 @@ export default function NewTemplate() {
 				} finally {
 					setIsLoading(false);
 				}
-			}
+			};
 			fetchWorkout();
 		}
 	}, [workoutId]);
 
-	const handleSubmit = async (data) => {
+	const handleSubmit = async (data: any) => {
 		try {
 			await axios.post('/api/templates', data, { withCredentials: true });
 			router.push('/templates');

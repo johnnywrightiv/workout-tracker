@@ -11,15 +11,7 @@ import {
 } from '@/store/workouts-slice';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-	SheetFooter,
-	SheetDescription,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
 	Select,
 	SelectContent,
@@ -27,30 +19,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
-import { format } from 'date-fns';
-import {
-	CalendarIcon,
-	Filter,
-	SortAsc,
-	UserPlus,
-	LogIn,
-	SortDesc,
-} from 'lucide-react';
+import { Filter, SortAsc, UserPlus, LogIn, SortDesc } from 'lucide-react';
 import { setUserDetails } from '@/store/auth-slice';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { SearchBar } from '@/components/search-bar';
 import { WorkoutCard } from '@/components/workout-card';
 import { convertWeight, convertDistance } from '@/lib/utils';
-
-import { EXERCISE_TYPES, MUSCLE_GROUPS, WEIGHT_TYPES } from '@/lib/constants';
+import { FilterContent } from '@/components/filter-content';
 
 export default function Home() {
 	const dispatch = useDispatch<AppDispatch>();
@@ -111,9 +86,9 @@ export default function Home() {
 			const lowercaseQuery = searchQuery.toLowerCase();
 			filtered = filtered.filter(
 				(workout) =>
-					workout.name.toLowerCase().includes(lowercaseQuery) ||
-					workout.exercises.some((exercise) =>
-						exercise.name.toLowerCase().includes(lowercaseQuery)
+					workout.name?.toLowerCase().includes(lowercaseQuery) ||
+					workout.exercises?.some((exercise: { name?: string }) =>
+						exercise.name?.toLowerCase().includes(lowercaseQuery)
 					)
 			);
 		}
@@ -135,18 +110,27 @@ export default function Home() {
 			filters.weightTypes.size > 0
 		) {
 			filtered = filtered.filter((workout) =>
-				workout.exercises.some((exercise) => {
-					const matchesType =
-						filters.exerciseTypes.size === 0 ||
-						filters.exerciseTypes.has(exercise.exerciseType);
-					const matchesMuscle =
-						filters.muscleGroups.size === 0 ||
-						filters.muscleGroups.has(exercise.muscleGroup);
-					const matchesWeight =
-						filters.weightTypes.size === 0 ||
-						filters.weightTypes.has(exercise.weightType);
-					return matchesType && matchesMuscle && matchesWeight;
-				})
+				workout.exercises?.some(
+					(exercise: {
+						exerciseType?: string;
+						muscleGroup?: string;
+						weightType?: string;
+					}) => {
+						const matchesType =
+							filters.exerciseTypes.size === 0 ||
+							(exercise.exerciseType &&
+								filters.exerciseTypes.has(exercise.exerciseType));
+						const matchesMuscle =
+							filters.muscleGroups.size === 0 ||
+							(exercise.muscleGroup &&
+								filters.muscleGroups.has(exercise.muscleGroup));
+						const matchesWeight =
+							filters.weightTypes.size === 0 ||
+							(exercise.weightType &&
+								filters.weightTypes.has(exercise.weightType));
+						return matchesType && matchesMuscle && matchesWeight;
+					}
+				)
 			);
 		}
 
@@ -180,134 +164,6 @@ export default function Home() {
 			},
 		});
 	};
-
-	const FilterContent = () => (
-		<>
-			<SheetHeader className="">
-				<SheetTitle>Filter Workouts</SheetTitle>
-			</SheetHeader>
-			<SheetDescription />
-			<div className="space-y-6 py-4">
-				<div className="space-y-4">
-					<Label>Date Range</Label>
-					<div className="flex gap-2">
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button
-									variant="outline"
-									className="w-full max-w-full justify-start truncate whitespace-nowrap text-left font-normal sm:w-[140px]"
-								>
-									<CalendarIcon className="mr-2 h-4 w-4" />
-									{filters.dateRange.from ? (
-										format(filters.dateRange.from, 'PPP')
-									) : (
-										<span>From date</span>
-									)}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className="w-auto p-0">
-								<Calendar
-									mode="single"
-									selected={filters.dateRange.from}
-									onSelect={(date) =>
-										setFilters((prev) => ({
-											...prev,
-											dateRange: {
-												...prev.dateRange,
-												from: date ?? undefined,
-											},
-										}))
-									}
-								/>
-							</PopoverContent>
-						</Popover>
-
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button
-									variant="outline"
-									className="w-full max-w-full justify-start truncate whitespace-nowrap text-left font-normal sm:w-[140px]"
-								>
-									<CalendarIcon className="mr-2 h-4 w-4" />
-									{filters.dateRange.to ? (
-										format(filters.dateRange.to, 'PPP')
-									) : (
-										<span>To date</span>
-									)}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className="w-auto p-0">
-								<Calendar
-									mode="single"
-									selected={filters.dateRange.to}
-									onSelect={(date) =>
-										setFilters((prev) => ({
-											...prev,
-											dateRange: {
-												...prev.dateRange,
-												to: date ?? undefined,
-											},
-										}))
-									}
-								/>
-							</PopoverContent>
-						</Popover>
-					</div>
-				</div>
-
-				{[
-					{
-						title: 'Exercise Type',
-						items: EXERCISE_TYPES,
-						filterKey: 'exerciseTypes' as const,
-					},
-					{
-						title: 'Muscle Group',
-						items: MUSCLE_GROUPS,
-						filterKey: 'muscleGroups' as const,
-					},
-					{
-						title: 'Weight Type',
-						items: WEIGHT_TYPES,
-						filterKey: 'weightTypes' as const,
-					},
-				].map(({ title, items, filterKey }) => (
-					<div key={title} className="space-y-4">
-						<Label>{title}</Label>
-						<div className="grid grid-cols-2 gap-2">
-							{items.map((item) => (
-								<div key={item} className="flex items-center space-x-2">
-									<Checkbox
-										id={`${filterKey}-${item}`}
-										checked={filters[filterKey].has(item)}
-										onCheckedChange={(checked) => {
-											setFilters((prev) => {
-												const newSet = new Set(prev[filterKey]);
-												if (checked) {
-													newSet.add(item);
-												} else {
-													newSet.delete(item);
-												}
-												return { ...prev, [filterKey]: newSet };
-											});
-										}}
-									/>
-									<Label htmlFor={`${filterKey}-${item}`} className="text-sm">
-										{item}
-									</Label>
-								</div>
-							))}
-						</div>
-					</div>
-				))}
-			</div>
-			<SheetFooter className="">
-				<Button variant="outline" onClick={resetFilters} className="w-full">
-					Reset Filters
-				</Button>
-			</SheetFooter>
-		</>
-	);
 
 	if (!isAuthenticated) {
 		return (
@@ -429,7 +285,7 @@ export default function Home() {
 			<div className="space-y-6">
 				{filteredWorkouts.map((workout) => (
 					<WorkoutCard
-						key={workout._id}
+						key={workout._id || workout.date}
 						workout={workout}
 						handleDelete={handleDelete}
 						measurementSystem={measurementSystem}
