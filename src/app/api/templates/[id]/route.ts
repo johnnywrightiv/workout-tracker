@@ -28,13 +28,12 @@ const templateSchema = z.object({
 });
 
 type Props = {
-	params: {
-		id: string;
-	};
+	params: Promise<{ id: string }>;
 };
 
 export async function GET(request: NextRequest, { params }: Props) {
 	try {
+		const { id } = await params;
 		const user = await verifyAuth(request);
 		if (!user?.userId) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -46,7 +45,7 @@ export async function GET(request: NextRequest, { params }: Props) {
 			!z
 				.string()
 				.regex(/^[0-9a-fA-F]{24}$/)
-				.safeParse(params.id).success
+				.safeParse(id).success
 		) {
 			return NextResponse.json(
 				{ message: 'Invalid template ID' },
@@ -55,7 +54,7 @@ export async function GET(request: NextRequest, { params }: Props) {
 		}
 
 		const template = await Template.findOne({
-			_id: params.id,
+			_id: id,
 			user_id: user.userId,
 		}).lean();
 
@@ -78,6 +77,7 @@ export async function GET(request: NextRequest, { params }: Props) {
 
 export async function PUT(request: NextRequest, { params }: Props) {
 	try {
+		const { id } = await params;
 		const user = await verifyAuth(request);
 		if (!user?.userId) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
 			!z
 				.string()
 				.regex(/^[0-9a-fA-F]{24}$/)
-				.safeParse(params.id).success
+				.safeParse(id).success
 		) {
 			return NextResponse.json(
 				{ message: 'Invalid template ID' },
@@ -101,7 +101,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
 		const validatedData = templateSchema.parse(body);
 
 		const template = await Template.findOneAndUpdate(
-			{ _id: params.id, user_id: user.userId },
+			{ _id: id, user_id: user.userId },
 			{ $set: validatedData },
 			{ new: true, runValidators: true }
 		).lean();
@@ -132,6 +132,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
 export async function DELETE(request: NextRequest, { params }: Props) {
 	try {
+		const { id } = await params;
 		const user = await verifyAuth(request);
 		if (!user?.userId) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -143,7 +144,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 			!z
 				.string()
 				.regex(/^[0-9a-fA-F]{24}$/)
-				.safeParse(params.id).success
+				.safeParse(id).success
 		) {
 			return NextResponse.json(
 				{ message: 'Invalid template ID' },
@@ -152,7 +153,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 		}
 
 		const template = await Template.findOneAndDelete({
-			_id: params.id,
+			_id: id,
 			user_id: user.userId,
 		}).lean();
 

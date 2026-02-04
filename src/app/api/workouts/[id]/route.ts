@@ -54,9 +54,10 @@ function handleError(error: any) {
 // GET single workout
 export async function GET(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		// Validate authentication
 		const user = verifyAuth(req);
 		if (!user) {
@@ -64,7 +65,7 @@ export async function GET(
 		}
 
 		// Validate ID format
-		if (!validateObjectId(params.id)) {
+		if (!validateObjectId(id)) {
 			return NextResponse.json(
 				{ message: 'Invalid workout ID' },
 				{ status: 400 }
@@ -73,7 +74,7 @@ export async function GET(
 
 		await connectToDatabase();
 		const workout = await Workout.findOne({
-			_id: params.id,
+			_id: id,
 			user_id: user.userId,
 		}).lean();
 
@@ -93,9 +94,10 @@ export async function GET(
 // UPDATE a workout by ID
 export async function PUT(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		// Validate authentication
 		const user = verifyAuth(req);
 		if (!user) {
@@ -103,7 +105,7 @@ export async function PUT(
 		}
 
 		// Validate ID format
-		if (!validateObjectId(params.id)) {
+		if (!validateObjectId(id)) {
 			return NextResponse.json(
 				{ message: 'Invalid workout ID' },
 				{ status: 400 }
@@ -129,7 +131,7 @@ export async function PUT(
 		};
 
 		const workout = await Workout.findOneAndUpdate(
-			{ _id: params.id, user_id: user.userId },
+			{ _id: id, user_id: user.userId },
 			{ $set: updateData },
 			{ new: true, runValidators: true }
 		).lean();
@@ -150,9 +152,10 @@ export async function PUT(
 // DELETE - Delete workout
 export async function DELETE(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		// Validate authentication
 		const user = verifyAuth(req);
 		if (!user) {
@@ -160,7 +163,7 @@ export async function DELETE(
 		}
 
 		// Validate ID format
-		if (!validateObjectId(params.id)) {
+		if (!validateObjectId(id)) {
 			return NextResponse.json(
 				{ message: 'Invalid workout ID' },
 				{ status: 400 }
@@ -169,7 +172,7 @@ export async function DELETE(
 
 		await connectToDatabase();
 		const workout = await Workout.findOneAndDelete({
-			_id: params.id,
+			_id: id,
 			user_id: user.userId,
 		}).lean();
 
