@@ -31,7 +31,7 @@
 		"@radix-ui/react-toast": "^1.2.2",
 		"@reduxjs/toolkit": "^2.3.0",
 		"@shadcn/ui": "^0.0.4",
-		"axios": "^1.12.0",
+		"axios": "^1.13.5",
 		"bcrypt": "^6.0.0",
 		"bcryptjs": "^2.4.3",
 		"class-variance-authority": "^0.7.0",
