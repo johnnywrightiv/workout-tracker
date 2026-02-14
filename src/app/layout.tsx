@@ -25,6 +25,12 @@ const geistMono = localFont({
 export const metadata: Metadata = {
 	title: 'Workout Tracker',
 	description: 'Improve your workouts with our tracker app!',
+	themeColor: '#0a0a0a',
+	appleWebApp: {
+		capable: true,
+		statusBarStyle: 'default',
+		title: 'Workout Tracker',
+	},
 };
 
 export default function RootLayout({
